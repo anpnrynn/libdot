@@ -8,6 +8,8 @@ Author:
 Anoop Kumar Narayanan
 anoop (dot) kn (at) gmail (dot) com
 anoop (dot) kn (at) live (dot) in 
+anoop (dot) kumar (dot) narayanan (at) gmail (dot) com
+
 
 Spec Revision:
 ==============
@@ -50,13 +52,13 @@ Use Cases:
 ==========
 Configuration files.
 All existing use-cases of XML.
-Dynamic GUI.
 
 
 Description
 ===========
-
+```
 The dot format is intended to be simple to understand, easily readable, portable while able to represent hierarchical data. Unlike JSON and XML formats, the dot format extensively relies on a line based information where each line represents data on a particular level. Each line is separated by a single '\n' and not '\r\n'. Empty lines are dropped and are not considered as data. Each tag starts with a '.' and the first set of lines without a '.' represents some configuration information which has the same format as a DOT line. Comment lines starts with a space. Each tag is followed by attribute value pair. The node specific data is represented with the attribute name '.'. Spaces are used as attribute and node specific value separator. The underscore is used as spaces so the there is no need for any demarcation. '*' or as Asterisk is used as a pointer to node data or an attribute. Multilevel pointers are not supported. In order to represent data of a child, the data in the next line having the tag should has to be preceded with an extra dot. The document cannot have multiple root nodes, if present the data will be appended to the original root node, the name of the new root node will be discarded.
+```
 
 Attribute Representation:
 =========================
@@ -124,7 +126,7 @@ Example of DOT representing the above data:
 .. .:This_is_also_a_body.
 ```
 
-[The above representation is correct, will create two textnode within the same body node by making use of the last node on the same level]. This format maybe dropped in the future. Suggest using a marker-selector.
+[The above representation is correct, will create two textnode within the same body node by making use of the last node on the same level]. This specific representation maybe dropped in the future. Suggest using a marker-selector.
 
 or the explicit representation (this will not create the same output as the previous example)
 ```
