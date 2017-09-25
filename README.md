@@ -6,10 +6,11 @@ THE DOT FORMAT - Version 1, Spec Revision 3
 Author:
 =======
 Anoop Kumar Narayanan
+```
 anoop (dot) kn (at) gmail (dot) com
 anoop (dot) kn (at) live (dot) in 
 anoop (dot) kumar (dot) narayanan (at) gmail (dot) com
-
+```
 
 Spec Revision:
 ==============
