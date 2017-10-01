@@ -1,0 +1,505 @@
+
+THE DOT FORMAT - Version 1, Spec Revision 4
+===========================================
+===========================================
+
+Author:
+=======
+Anoop Kumar Narayanan,
+Bangalore,
+India
+
+
+Copyright Information:
+======================
+This design document and entire the contents of this design document are hereby 
+made available for free under the PUBLIC DOMAIN.
+
+
+Highlights In Revision4:
+========================
+
+Document:
+---------
+Re-written the entire document, to increase readability.
+Added FAQ.
+
+Spec:
+-----
+Removed operations from within element nodes.
+Added new marker-selector line support for use with operations.
+Operations have been moved onto its on lines, each line is one operation.
+Added support for non executable BLOB/CLOBs within the heirarchy.
+Elements can have duplicate attributes.
+The document can have multiple root nodes.
+
+
+
+Spec Revision:
+==============
+4 - 02/10/2017
+NOTE: This revision is the new format, please ignore revision 1, 2, and 3.
+
+    ____  ____  ______   __________  ____  __  ______  ______
+   / __ \/ __ \/_  __/  / ____/ __ \/ __ \/  |/  /   |/_  __/
+  / / / / / / / / /    / /_  / / / / /_/ / /|_/ / /| | / /   
+ / /_/ / /_/ / / /    / __/ / /_/ / _, _/ /  / / ___ |/ /    
+/_____/\____/ /_/    /_/    \____/_/ |_/_/  /_/_/  |_/_/     
+ _    ____________  _____ ________  _   __   ___             
+| |  / / ____/ __ \/ ___//  _/ __ \/ | / /  <  /             
+| | / / __/ / /_/ /\__ \ / // / / /  |/ /   / /              
+| |/ / /___/ _, _/___/ // // /_/ / /|  /   / /               
+|___/_____/_/ |_|/____/___/\____/_/ |_/   /_/                
+    ____  _______    ___________ ________  _   __   __ __    
+   / __ \/ ____/ |  / /  _/ ___//  _/ __ \/ | / /  / // /    
+  / /_/ / __/  | | / // / \__ \ / // / / /  |/ /  / // /_    
+ / _, _/ /___  | |/ // / ___/ // // /_/ / /|  /  /__  __/    
+/_/ |_/_____/  |___/___//____/___/\____/_/ |_/     /_/       
+                                                             
+
+
+
+Inspired from limitations of XML:
+=================================
+XML isn't the most grep-able text data format.
+XML patching is extremely difficult using patch command.
+XML doesn't give information on hierarchy depth.
+XML requires a dedicated parser.
+XML distinguishes between attribute and nodes.
+XML requires a closing tag.
+XML cannot grow, unless it opened in a DOM parser and modified.
+XML conventionally doesn't have links.
+XML doesn't have support for inbuilt tags or id.
+XML doesn't have support for inbuilt query or query results storing.
+
+
+
+Purpose:
+========
+Compatible with XML. XML -> DOT (works), DOT -> XML (not always)
+Text format, No support for unicode as yet.
+Every line is a node.
+No element end tag.
+Skips invalid lines, continues with the rest.
+Its Lightweight.
+Easily readable.
+Easily editable.
+Easily portable.
+Easily debug-able.
+Easily searchable using command line tools.
+Easily patch-able using patch command.
+Easily grow-able, can add and delete nodes/attributes/tags.
+Easily represent hierarchical data.
+Easily add data links to other nodes and attributes.
+Every attribute is also a node unlike XML.
+Support for embedding BLOB/CLOB/Files. (Revision 4)
+Support for duplicate attributes. (Revision 4)
+
+
+
+Use Cases:
+==========
+Can be used as a configuration file.
+Can be used as an non-compressed archive as well
+Can be used as log files.
+Can be used as a change log file.
+Can be used to load data into a data structure.
+Can be used as text base network protocol.
+Can be used as a new format for E-Mails/Messaging ...etc.
+Can be used for small databases.
+All existing use-cases of XML.
+
+
+
+LIMITATIONS
+===========
+* The characters "." or period, "@" or at, "#" or hash cannot be used as
+  attribute names ever.
+* Cannot use "," or comma in as element or attribute names.
+* Does not support unicode as of now.
+* Does not support namespaces as of now.
+
+
+
+Description
+===========
+
+The DOT format is designed to be simple, easy to understand and easy to use for
+developers, engineers... etc. It can represent hierarchical data. Unlike JSON
+and XML format, the DOT format extensively relies on line based information.
+Each line represent a Node which maybe an Element as well. All lines are
+terminated with a "\r\n" or "\n". Support for empty lines and comments also
+exist, and the best part removing a node is as simple as putting a space
+before the line. Each line containing a valid information must begin with a "."
+or DOT. Each element can have attributes including duplicate attributes. The
+attribute and value are separated using ":" or a colon. The attribute-value
+pairs themselves are separated using using a " " or space. The values can have
+spaces which are represented using "_" or underscore, naturally this means that
+"_" or underscore will have to be escaped. In order to represent data of a child
+element, the data in the next line having the tag should be preceded with an
+extra dot. The document can have multiple root nodes. There is no support for
+namespaces, but since element names can have special characters of ASCII, it can
+be made used of in representing software specific elements.
+
+
+
+Namespaces Representation:
+==========================
+DOT format does not support Namespaces. Use a dot "." between namespace and
+element name if you want specify a namespace, but please note the whole string
+will be considered as an element name.
+
+Example:
+--------
+.os.name .:Windows_xp 
+Here "os.name" is the element name.
+
+
+
+Node Representation:
+====================
+If line starts with:
+" "            - Treated as a Comment Line
+"\r\n" or "\n" - Treated as a Empty Line
+"."            - Treated as a Dot Line containing information to be parsed.
+"@"            - Treated as selector for DOT operation.
+"#"            - Treated as a DOM operation Line.
+All Others     - Treated as Configuration Line containing Name:Value
+
+Example:
+--------
+* Example of a configuration line:
+version:1;this is a configuration line, which is a name value pair.
+
+* Example of a Comment line:
+ this is a comment line as it begins with a space
+
+* Example of a DOT information line:
+.object .:this_is_a_dot_information_line_containing_an_element_with_attribute.
+
+* Example of a selector line:
+@ UniqueMarker1
+
+* Example of a DOT operation line:
+# .:This_appends_a_text_attribute_to_the_last_parsed_node.
+
+
+
+NOTE:
+-----
+* DOT "Operation" line cannot be easily ported to XML or other Serialisation
+data formats.
+* DOT "Operation" line will always work on the last node that was parsed. So, In
+order to make it work on earlier nodes, you will need to select it.
+
+
+Element Representation:
+=======================
+The line always starts with ".". If the sequence of "." is followed by
+
+"+"            - Treated as attribute append for previous DOT line, 
+                 Number of dots has to be equal to depth of previous line +1.
+                 This is basically to improve the readability.
+"^"            - Treated as Reset cursor to Last parsed DOT line before
+                 the user of "@" (Marker-Selector)
+All Others     - Treated as normal element names
+
+
+Special Elements:
+-----------------
++ - Used to append attributes to the previous line
+^ - Reset cursor to the last tag in the DOM
+
+TODO: Need to verify this
+NOTE: Appending attributes can also be done by making use of Marker-Selectors.
+NOTE: Try to avoid using special characters in ascii as element names.
+
+
+
+Attribute Representation:
+=========================
+All node's child text-node start with ".". It is also know as text attribute.
+All other attribute's name can be anything other than a "." . Attributes doesn't
+need quotes anymore, it makes uses of "_" to separate words. The spaces are used
+for attribute-value pair separation.
+
+Example:
+* Example of an element with a normal attribute:
+.object1 attribute1:value_of_attribute1 attribute2:value_of_attribute2 
+
+* Example of an element with a text attribute:
+.object2 .:first_node_text_data_which_is_also_represented_as_an_attribute.
+
+
+Multi-line Attributes: Giving clarity to reader
+-----------------------------------------------
+To make attributes more readable, Attributes can be pushed to the next line with
+the '.' depth incremented by one followed by an immediate '+'.
+
+* Example of an element with its attribute in the following line:
+.body attr1:this_is_an_attribute.
+..+ bodyattr2:this_is_another_attribute_of_body.
+
+
+BLOB and CLOB Attributes: (New in Revision 4)
+---------------------------------------------
+Embedding BLOB/CLOB can only be done using DOT operation "<", which means the
+node has to be selected first for the operation. If the Embedded BLOB/CLOB
+requires additional information, it can be supplied as additional attributes in
+a particular node. BLOB/CLOB can be added only to an attribute. In otherwords,
+the data is always stored as part of an attribute. This BLOB/CLOB addition
+description has to be followed by '\n' following which the LOB data should start
+and continue until 65536 bytes followed by a '\n' after which the dot
+information can begin again.
+
+There are other associated attributes to the description attribute, these are
+suffixed with a string to represent various associated information about the
+BLOB/CLOB. These are not mandatory, "name" for filename, "mime" for MIME type,
+"perm" for permissions of the file, "uid" for user-id , "gid" for group-id,
+"type" for type of file, "mtime" for modification time, "lname" for link-name.
+This makes the DOT Format also like an archive of sorts.
+
+TODO: Blobs cannot be added to text attributes or "."
+
+Example:
+--------
+
+* Example of a BLOB addition to a node:
+.lob @:lob1name blob1name:blobfile.bin blob1mime:bin/octet-stream 
+@ lob1name
+# <:blob1,blob,65536
+ |<---Comment in this example: Data of size 65536 bytes comes here --->|
+
+* Example of a CLOB addition to a node:
+.lob @:lob2name clob1name:somescript.js clob1mime:text/javascript
+@ lob2name
+# <:clob1,clob,8192
+ |<---Comment in this example: Data of size 8192 bytes comes here --->|
+
+
+Special Attributes:
+-------------------
+. - Text Attribute of an Element, multiple attributes possible.
+@ - Unique Marker-Selector Attribute, multiple attributes not possible.
+# - Tags Attribute, Seperated by commas, multiple attributes possible.
+
+Examples:
+---------
+* Example of a text-node attribute.
+.:This_is_the_first_node_data_that_is_seperated_by_underscore.
+
+* Example of a marker-selector, either creates a marker for a element or selects
+  an element based on the marker-selector.
+@:UniqueMarker1278940
+
+* Example of tags associated with an element
+#:ram,ddr4,ddr4_2400Mhz   (creates tag attribute for the element)
+
+
+
+Value Representation:
+=====================
+All values are associated with an attribute names. Attribute value pairs are
+separated using a space. Space " " is itself represented using an underscore or
+it can be represented with the help of DOT Escape Character "`".
+
+Example:
+--------
+* Example of a value associated with a text-node attribute.
+.h1  .:This_is_a_header1_line.
+
+
+
+Selection Representation:
+=========================
+The first selected element is marked as "to" element. If there is multiple DOT 
+selectors then the latest selected is marked as "to" element and the one
+previous to that is marked as "from" element. To clear selection use a DOT 
+selector line with no markers.
+
+This is primarily used by DOT operations.
+
+Example:
+--------
+
+* Example of setting "to" element.
+@ toElement
+
+* Example of setting "from" and "to" elements. The latest one is "to" element
+  the older one is "from" element.
+@ fromElement
+@ toElement
+
+* Example where in older ones are no longer selected.
+@ notSelectedElement1
+@ notSelectedElement2
+@ notSelectedElement3
+@ fromElement
+@ toElement
+
+* Example of clearing selected nodes.
+@ clearedFromElement
+@ clearedToElement
+@
+
+
+Operation Representation:
+=========================
+Operations require use of selected elements, the elements are selected using the
+marker-selector character and the use of DOT selector lines. Some operations
+require use of multiple selected elements, in which case there should be 2 DOT
+selectors. Examples for these are given in the previous section (Selection
+Representation).
+
+The first is always "to" element and the second is always "from" element, unless
+there is only one in which case its always "to" element.
+
+Example:
+--------
+
+* Example of appending data of one attribute to another. Requires user to
+  specify the occurrence number of the attribute.
+# +:AttributeName1,0,AttributeName2,0
+
+* Example of overwriting data one attribute with another.
+# =:AttributeName1,0,AttributeName2,0
+
+* Example of deleting an attribute.
+# -:AttributeName3,0
+
+* Example of associating an attribute from one node to attribute on another.
+  Creates a link. The "from" node attribute gets linked to the attribute in "to"
+  node. 
+# @:AttributeName4,5,AttributeName5,0
+
+* Example of associating a node to attribute of another node. Creates a link.
+  The "from" node gets linked to this new attribute in "to" node.
+# @:AttributeName4a
+
+* Example of associating result of a tag search to an existing attribute.
+# ?:AttributeName5,4,ddr4`_2400Mhz
+
+* Example of associating result of a tag search with a new attribute.
+# ?:AttributeName5,ddr4`_2400Mhz
+
+* Example of associating inverted result of tag search with an existing
+  attribute.
+# ~:AttributeName6,3,ddr4`_2400Mhz,ram
+
+* Example of associating inverted result of tag search with a new attribute.
+# ~:AttributeName6,ddr4`_2400Mhz,ram
+
+* Example of associating result of a string split with an attribute.
+# ,:AttributeName7,Value
+
+* Example of associating a BLOB with a node attribute.
+# <:AttributeName8,blob,bin/octet-stream,65536
+
+
+
+Escapes:
+========
+In Version 1 of the dot format:
+The '`' is used as escaping character, the reason being '\' is used as path
+separator in on windows devices. And, backquote is very rarely used (Just a
+feeling, not based on any research data).
+
+`  or Backquote  is represented as '``'.
+_  or Underscore is represented as '`_' 
+\n or Newline    is represented as '`n'.
+\t or Tab        is represented as '`t'.
+\r or C Return   is represented as '`r'.
+
+NOTE: None of the other characters require escaping.
+
+DYNAMIC ESCAPES:
+----------------
+The separators can be used in the attributes by escaping them. An 
+attribute-value pair is separated by ":", so using "`:" escapes the colon.
+Values have a terminating character which is a space " ", this can be escaped
+too by making use of "` ". Same goes for tags/lists where the separator is a ","
+, this can be escaped again by making use of escaping character "`,". 
+
+Example:
+--------
+* Examle of escaping a colon for use in attribute name:
+.obj id`:`:`:`:`::id1 
+
+* Example of escaping a space for use in attribute value:  
+.obj id:this_is_a` single:attribute_value
+
+* Example of escaping a space for use in tag-attribute value:
+.obj #:one,two,three`,four` five
+
+
+
+Parsing:
+========
+It can be parsed with simple string operations such as readline(), string
+split() and string substitute(). The would however be a need for a escaping
+functionality. Hence technically there is no need for a library as such. However
+, a parser library would be very helpful. 
+
+It can be parsed even from within Javascript easily.
+
+
+
+Example of XML Compatibility:
+=============================
+
+<html>
+ <head>
+  <title>
+   This is a title.
+  </title>
+ </head>
+ <body class="bodyclass">
+  This is a body.
+  <h1>
+   This is a header1 line.
+  </h1>
+  This is also a body.
+ </body>
+</html>
+
+Example of DOT format representation of the above data:
+
+.html
+..head
+...title .:This_is_a_title.
+..body @:bodymarker1 class:bodyclass .:This_is_a_body.
+...h1  .:This_is_a_header1_line.
+..body @:bodymarker1 .:This_is_also_a_body.
+
+
+
+FAQ:
+====
+
+1. Why do we use underscore as a space ?
+The reason is there are no demarcations to let the parser know that it is the 
+end of an attribute value, and more over the space character is used as a
+separator between attribute-value pairs. Also, using underscore would be more
+readable to the user editing it, as it will be one big contiguous value. Having
+a seperator like ";" would be very hard to read when the attribute-value is very
+large.
+
+
+
+Contact Information:
+====================
+
+E-Mail:
+-------
+anoop (dot) kn (at) gmail (dot) com
+anoop (dot) kn (at) live (dot) in
+anoop (dot) kumar (dot) narayanan (at) gmail (dot) com
+
+Mobile:
+-------
+SMS me before calling !!!
+(India code) nine eight eight six zero one six five eight one.
+
+Twitter:
+--------
+@anpnrynn
