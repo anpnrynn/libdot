@@ -1,0 +1,83 @@
+Right now, the real world uses are unlimited, but the 
+following use cases can really help people out for various
+tasks. This is in addition to the usecases of XML/JSON which
+can be easily applied to DOT format.
+
+FYI: This DOT format is free and in public domain.
+
+CURRENT USECASES
+================
+As the DOT format is not popular as of now, this document 
+can basically give you some idea on where to use this file
+format. The DOT format can effectively replace XML, but here
+are some usecases where in XML/JSON could be immediately 
+replaced.
+
+1. Storing XML/HTML in SOURCE Control
+-------------------------------------
+One of the biggest problems with XML/HTML is merging files,
+in source control. The way to fix this issue is to store the
+information as DOT file and then convert it to XML/HTML.
+Or, use DOT itself.
+
+2. Patching XML/HTML
+--------------------
+Ever tried to patch XML/HTML without using a DOM parser ?
+Well, it wasn't designed to be used for patch command.
+
+3. Parsing DOT CLOB in Database
+-------------------------------
+CLOB has been there in database for quite some time, but
+SQL search within CLOB is hard even if it is stored in XML
+or for that matter JSON. In both these document format the
+whole file needs to be parsed. Or SAX parser has to be used
+in the case of XML.
+Instead if DOT was used, all that needs to be done is to 
+read the line with the appropriate depth speeding up the 
+whole process.
+
+Example:
+An SQL statement incorporating DOT could be something like 
+this:
+
+SELECT name FROM people WHERE people.clobinfo.datatype == 
+"DOT" AND people.clobinfo.element == "notthoughtofinfo4" AND
+people.clobinfo.elementdepth == 4 && people.clobinfo.element
+parents == "peopleinfo,extrainfo,familyinfo";
+
+This could also be done in XML/JSON, but the search will 
+be  a lot slower than using DOT file format.
+
+4. Replace generic resource file in IDEs
+----------------------------------------
+Its lightweight, and it supports appending binary data with 
+minimal amount of effort.
+
+5. Use in embedded environment:
+-------------------------------
+In embedded environment space matters, libxml2 is very large
+and libjson-c is small, but DOT's selling point is it provides
+XML like hierarchical structure with attributes etc and is 
+extremely small in size.
+
+6. Use in configuration files:
+------------------------------
+Lets say we need to make changes to configuration of an app,
+in the case of XML/JSON, you probably need to presupport profiles
+or array of configurations. In DOT all one needs to do is append
+changes to delete attributes/nodes/elements and create new ones
+in place of it.
+
+7. Use in HTML editors:
+-----------------------
+Don't store HTML/XML, instead convert it and store it in DOT. 
+DOT supports multiple Root elements. The entire set of webpages 
+can be stored in a single DOT format file. Changes can just be
+appended to it. Imagine, only at the time of deployment you need
+to convert it back to HTML/XML.
+
+8. Use in GUI IDEs:
+-------------------
+UI design is generally stored using XML, Here we are considering
+only Glade and Qt Designer opensource products. If your project
+needs Source Control and it most likely will read point 1.
