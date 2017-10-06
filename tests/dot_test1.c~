@@ -1,0 +1,11 @@
+#include <stdio.h>
+#include <dot.h>
+
+
+int main () {
+	DOT_PARSER *dotParser = dot_parser_new ();
+
+	char *line001 = "version:1\n";
+	char *line002 = "author:Anoop Kumar Narayanan\n";
+	dot_parser_parse_line ( dotParser,line001, strlen(line001) );
+}

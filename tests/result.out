@@ -1,0 +1,501 @@
+DBUG: dot_parser_parse_line(): Detected configuration line 
+DBUG: dot_parser_parse_line(): Detected configuration line 
+DBUG: dot_parser_parse_line(): Detected \r\n in the line, ignoring 
+DBUG: dot_parser_parse_line(): Detected comment line 
+DBUG: dot_parser_parse_line(): Detected comment line 
+DBUG: dot_parser_parse_line(): Detected comment line 
+DBUG: dot_parser_parse_line(): Detected empty line 
+DBUG: dot_parser_parse_line(): Detected \r\n in the line, ignoring 
+DBUG: dot_parser_parse_line(): Detected empty line 
+DBUG: dot_parser_parse_line(): Detected actual dot line 
+DBUG: dot_parser_parse_line(): Detected actual dot line 
+DBUG: dot_parser_parse_line(): Detected id in node, Looking up xyz123 Unsuccessful
+DBUG: dot_parser_parse_line(): Not Merging 
+WARN: dot_parser_parse_line(): Reached here 8
+DBUG: dot_parser_parse_line(): Detected actual dot line 
+DBUG: dot_parser_parse_line(): Detected id in node, Looking up xyz1234 Unsuccessful
+DBUG: dot_parser_parse_line(): Not Merging 
+DBUG: dot_parser_parse_line(): Skipping attribute as the value is empty 
+DBUG: dot_parser_parse_line(): Skipping attribute as the value is empty 
+DBUG: dot_parser_parse_line(): Skipping attribute as the value is empty 
+WARN: dot_parser_parse_line(): Reached here 8
+DBUG: dot_parser_parse_line(): Detected actual dot line 
+WARN: dot_parser_parse_line(): Reached here 8
+DBUG: dot_parser_parse_line(): Detected actual dot line 
+DBUG: dot_parser_parse_line(): Detected tags in node 
+WARN: dot_parser_parse_line(): Reached here 7
+DBUG: dot_parser_parse_line(): Detected actual dot line 
+WARN: dot_parser_parse_line(): Depth greater than previous node depth + 1 ... Dropping node 
+DBUG: dot_parser_parse_line(): Detected actual dot line 
+DBUG: dot_parser_parse_line(): Detected tags in node 
+WARN: dot_parser_parse_line(): Reached here 7
+DBUG: dot_parser_parse_line(): Detected actual dot line 
+INFO: dot_parser_parse_line(): Detected DOT Node Append Action  
+DBUG: dot_parser_parse_line(): Detected actual dot line 
+INFO: dot_parser_parse_line(): Detected DOT Node Append Action  
+DBUG: dot_parser_parse_line(): Detected actual dot line 
+WARN: dot_parser_parse_line(): Depth greater than previous node depth + 1 ... Dropping node 
+DBUG: dot_parser_parse_line(): Detected actual dot line 
+INFO: dot_parser_parse_line(): Detected DOT Node Append Action  
+WARN: dot_parser_parse_line(): Depth of attribute line incorrect... Dropping attributes 
+DBUG: dot_parser_parse_line(): Detected actual dot line 
+DBUG: dot_parser_parse_line(): Detected tags in node 
+WARN: dot_parser_parse_line(): Reached here 8
+DBUG: dot_parser_parse_line(): Detected actual dot line 
+DBUG: dot_parser_parse_line(): Detected tags in node 
+WARN: dot_parser_parse_line(): Reached here 8
+DBUG: dot_parser_parse_line(): Detected actual dot line 
+DBUG: dot_parser_parse_line(): Detected tags in node 
+WARN: dot_parser_parse_line(): Reached here 8
+DBUG: dot_parser_parse_line(): Detected actual dot line 
+DBUG: dot_parser_parse_line(): Detected tags in node 
+WARN: dot_parser_parse_line(): Reached here 10
+DBUG: dot_parser_parse_line(): Detected actual dot line 
+WARN: dot_parser_parse_line(): Reached here 9
+DBUG: dot_parser_parse_line(): Detected actual dot line 
+WARN: dot_parser_parse_line(): Reached here 8
+DBUG: dot_parser_parse_line(): Detected actual dot line 
+DBUG: dot_parser_parse_line(): Detected tags in node 
+WARN: dot_parser_parse_line(): Reached here 8
+DBUG: dot_parser_parse_line(): Detected actual dot line 
+WARN: dot_parser_parse_line(): Reached here 8
+DBUG: dot_parser_parse_line(): Detected actual dot line 
+DBUG: dot_parser_parse_line(): Detected tags in node 
+WARN: dot_parser_parse_line(): Reached here 7
+DBUG: dot_parser_parse_line(): Detected actual dot line 
+WARN: dot_parser_parse_line(): Reached here 7
+DBUG: dot_parser_parse_line(): Detected actual dot line 
+DBUG: dot_parser_parse_line(): Detected tags in node 
+WARN: dot_parser_parse_line(): Reached here 8
+DBUG: dot_parser_parse_line(): Detected actual dot line 
+WARN: dot_parser_parse_line(): Reached here 7
+DBUG: dot_parser_parse_line(): Detected actual dot line 
+DBUG: dot_parser_parse_line(): Detected id in node, Looking up xyz123 Successful
+DBUG: dot_parser_parse_line(): Detected tags in node 
+DBUG: dot_parser_parse_line(): Detected actual dot line 
+INFO: dot_parser_parse_line(): Detected DOT Node Append Action  
+DBUG: dot_parser_parse_line(): Detected actual dot line 
+INFO: dot_parser_parse_line(): Detected DOT Node Append Action  
+DBUG: dot_parser_parse_line(): Detected actual dot line 
+INFO: dot_parser_parse_line(): Detected DOT Node POP action 
+DBUG: dot_parser_parse_line(): Detected actual dot line 
+DBUG: dot_parser_parse_line(): Detected id in node, Looking up 1234567 Unsuccessful
+DBUG: dot_parser_parse_line(): Not Merging 
+DBUG: dot_parser_parse_line(): Detected tags in node 
+WARN: dot_parser_parse_line(): Reached here 9
+DBUG: dot_parser_parse_line(): Detected actual dot line 
+DBUG: dot_parser_parse_line(): Detected id in node, Looking up 1234 Unsuccessful
+DBUG: dot_parser_parse_line(): Not Merging 
+DBUG: dot_parser_parse_line(): Detected tags in node 
+WARN: dot_parser_parse_line(): Reached here 8
+DBUG: dot_parser_parse_line(): Detected actual dot line 
+DBUG: dot_parser_parse_line(): Detected id in node, Looking up 123xxx4 Unsuccessful
+DBUG: dot_parser_parse_line(): Not Merging 
+DBUG: dot_parser_parse_line(): Detected tags in node 
+WARN: dot_parser_parse_line(): Reached here 7
+DBUG: dot_parser_parse_line(): Detected actual dot line 
+DBUG: dot_parser_parse_line(): Detected tags in node 
+DBUG: dot_parser_parse_line(): Detected id in node, Looking up 123xxx4 Successful
+DBUG: dot_parser_parse_line(): Detected actual dot line 
+INFO: dot_parser_parse_line(): Detected DOT Node POP action 
+DBUG: dot_parser_parse_line(): Detected actual dot line 
+WARN: dot_parser_parse_line(): Reached here 9
+DBUG: dot_parser_parse_line(): Detected actual dot line 
+WARN: dot_parser_parse_line(): Reached here 8
+DBUG: dot_parser_parse_line(): Detected actual dot line 
+DBUG: dot_parser_parse_line(): Detected tags in node 
+WARN: dot_parser_parse_line(): Reached here 8
+DBUG: dot_parser_parse_line(): Detected actual dot line 
+INFO: dot_parser_parse_line(): Detected DOT Node Append Action  
+DBUG: dot_parser_parse_line(): Detected actual dot line 
+INFO: dot_parser_parse_line(): Detected DOT Node Append Action  
+DBUG: dot_parser_parse_line(): Detected actual dot line 
+WARN: dot_parser_parse_line(): Depth greater than previous node depth + 1 ... Dropping node 
+DBUG: dot_parser_parse_line(): Detected actual dot line 
+WARN: dot_parser_parse_line(): Depth greater than previous node depth + 1 ... Dropping node 
+DBUG: dot_parser_parse_line(): Detected actual dot line 
+INFO: dot_parser_parse_line(): Detected DOT Node Append Action  
+WARN: dot_parser_parse_line(): Depth of attribute line incorrect... Dropping attributes 
+DBUG: dot_parser_parse_line(): Detected actual dot line 
+DBUG: dot_parser_parse_line(): Detected tags in node 
+WARN: dot_parser_parse_line(): Reached here 7
+DBUG: dot_parser_parse_line(): Detected marker selector @1234 dot  line 
+DBUG: dot_parser_parse_line(): Detected marker selector @xyz123 dot  line 
+DBUG: dot_parser_parse_line(): Detected marker selector dot clear line 
+DBUG: dot_parser_parse_line(): Detected \r\n in the line, ignoring 
+DBUG: dot_parser_parse_line(): Detected marker selector dot clear line 
+DBUG: dot_parser_parse_line(): Detected marker selector @1234 dot  line 
+DBUG: dot_parser_parse_line(): Detected marker selector @xyz123 dot  line 
+INFO: main(): ======================================================
+INFO: =============================================================================
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:0, type:DOT_NODE_ROOT, eval:0, pname:, name:root, @:, value: 
+INFO: =============================================================================
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:1, type:DOT_NODE_CONFIGURATION, eval:0, pname:root, name:version, @:, value:1 
+INFO: =============================================================================
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:1, type:DOT_NODE_CONFIGURATION, eval:0, pname:root, name:author, @:, value:Anoop Kumar Narayanan 
+INFO: =============================================================================
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:1, type:DOT_NODE_COMMENT, eval:0, pname:root, name:, @:, value:  
+INFO: =============================================================================
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:1, type:DOT_NODE_COMMENT, eval:0, pname:root, name:, @:, value:	 
+INFO: =============================================================================
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:1, type:DOT_NODE_COMMENT, eval:0, pname:root, name:, @:, value: 						 
+INFO: =============================================================================
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:1, type:DOT_NODE_EMPTY, eval:0, pname:root, name:, @:, value: 
+INFO: =============================================================================
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:1, type:DOT_NODE_EMPTY, eval:0, pname:root, name:, @:, value: 
+INFO: =============================================================================
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:1, type:DOT_NODE_ELEMENT, eval:0, pname:root, name:html, @:, value: 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:2, type:DOT_NODE_ATTRIBUTE, eval:0, pname:html, name:first, @:, value:1first 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:2, type:DOT_NODE_ATTRIBUTE, eval:0, pname:html, name:second, @:, value:2second 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:2, type:DOT_NODE_ATTRIBUTE, eval:0, pname:html, name:third, @:, value:3third 
+INFO: =============================================================================
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:1, type:DOT_NODE_ELEMENT, eval:0, pname:root, name:html1, @:xyz123, value: 
+INFO: dot_parser_dump_tags(): |----> TAG: a1 
+INFO: dot_parser_dump_tags(): |----> TAG: b2 
+INFO: dot_parser_dump_tags(): |----> TAG: c3 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:2, type:DOT_NODE_ATTRIBUTE, eval:0, pname:html1, name:first, @:, value:1first 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:2, type:DOT_NODE_ATTRIBUTE, eval:0, pname:html1, name:second, @:, value:2second 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:2, type:DOT_NODE_ATTRIBUTE, eval:0, pname:html1, name:third, @:, value:3third 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:2, type:DOT_NODE_TEXTATTRIBUTE, eval:0, pname:html1, name:., @:, value:xyz1234 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:2, type:DOT_NODE_ATTRIBUTE, eval:0, pname:html1, name:first, @:, value:1first 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:2, type:DOT_NODE_ATTRIBUTE, eval:0, pname:html1, name:xxxsecond, @:, value:2second 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:2, type:DOT_NODE_ATTRIBUTE, eval:0, pname:html1, name:third, @:, value:3third 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:2, type:DOT_NODE_ATTRIBUTE, eval:0, pname:html1, name:fourth, @:, value:4fourth 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:2, type:DOT_NODE_ATTRIBUTE, eval:0, pname:html1, name:fifth, @:, value:5fifth 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:2, type:DOT_NODE_ATTRIBUTE, eval:0, pname:html1, name:1third, @:, value:3third 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:2, type:DOT_NODE_ATTRIBUTE, eval:0, pname:html1, name:2fourth, @:, value:4fourth 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:2, type:DOT_NODE_ATTRIBUTE, eval:0, pname:html1, name:4fifth, @:, value:5fifth 
+INFO: =============================================================================
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:1, type:DOT_NODE_ELEMENT, eval:0, pname:root, name:html2, @:xyz1234, value: 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:2, type:DOT_NODE_ATTRIBUTE, eval:0, pname:html2, name:first, @:, value:1first 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:2, type:DOT_NODE_ATTRIBUTE, eval:0, pname:html2, name:second, @:, value:2second 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:2, type:DOT_NODE_ATTRIBUTE, eval:0, pname:html2, name:third, @:, value:3third 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:2, type:DOT_NODE_ATTRIBUTE, eval:0, pname:html2, name:fourth, @:, value:4fourth12345 this will do 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:2, type:DOT_NODE_ATTRIBUTE, eval:0, pname:html2, name:eighth, @:, value:8th 
+INFO: =============================================================================
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:1, type:DOT_NODE_ELEMENT, eval:0, pname:root, name:html3, @:, value: 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:2, type:DOT_NODE_TEXTATTRIBUTE, eval:0, pname:html3, name:., @:, value:xyz1234 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:2, type:DOT_NODE_ATTRIBUTE, eval:0, pname:html3, name:first, @:, value:1first 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:2, type:DOT_NODE_ATTRIBUTE, eval:0, pname:html3, name:xxxsecond, @:, value:2second 
+INFO: =============================================================================
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:2, type:DOT_NODE_ELEMENT, eval:0, pname:html3, name:html3.1, @:, value: 
+INFO: dot_parser_dump_tags(): |----> TAG: one 
+INFO: dot_parser_dump_tags(): |----> TAG: two 
+INFO: dot_parser_dump_tags(): |----> TAG: three 
+INFO: dot_parser_dump_tags(): |----> TAG: four 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:3, type:DOT_NODE_TEXTATTRIBUTE, eval:0, pname:html3.1, name:., @:, value:xyz1234 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:3, type:DOT_NODE_ATTRIBUTE, eval:0, pname:html3.1, name:first, @:, value:1first 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:3, type:DOT_NODE_ATTRIBUTE, eval:0, pname:html3.1, name:xxxsecond, @:, value:2second 
+INFO: =============================================================================
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:3, type:DOT_NODE_ELEMENT, eval:0, pname:html3.1, name:html4.1, @:, value: 
+INFO: dot_parser_dump_tags(): |----> TAG: one 
+INFO: dot_parser_dump_tags(): |----> TAG: two 
+INFO: dot_parser_dump_tags(): |----> TAG: three 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:4, type:DOT_NODE_TEXTATTRIBUTE, eval:0, pname:html4.1, name:., @:, value:xyz1234 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:4, type:DOT_NODE_ATTRIBUTE, eval:0, pname:html4.1, name:first, @:, value:1first 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:4, type:DOT_NODE_ATTRIBUTE, eval:0, pname:html4.1, name:xxxsecond, @:, value:2second 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:4, type:DOT_NODE_ATTRIBUTE, eval:0, pname:html4.1, name:third, @:, value:3third 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:4, type:DOT_NODE_ATTRIBUTE, eval:0, pname:html4.1, name:fourth, @:, value:4fourth 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:4, type:DOT_NODE_ATTRIBUTE, eval:0, pname:html4.1, name:fifth, @:, value:5fifth 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:4, type:DOT_NODE_ATTRIBUTE, eval:0, pname:html4.1, name:1third, @:, value:3third 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:4, type:DOT_NODE_ATTRIBUTE, eval:0, pname:html4.1, name:2fourth, @:, value:4fourth 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:4, type:DOT_NODE_ATTRIBUTE, eval:0, pname:html4.1, name:4fifth, @:, value:5fifth 
+INFO: =============================================================================
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:3, type:DOT_NODE_ELEMENT, eval:0, pname:html3.1, name:html4.2, @:, value: 
+INFO: dot_parser_dump_tags(): |----> TAG: one 
+INFO: dot_parser_dump_tags(): |----> TAG: two 
+INFO: dot_parser_dump_tags(): |----> TAG: three 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:4, type:DOT_NODE_TEXTATTRIBUTE, eval:0, pname:html4.2, name:., @:, value:xyz1234 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:4, type:DOT_NODE_ATTRIBUTE, eval:0, pname:html4.2, name:first, @:, value:1first 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:4, type:DOT_NODE_ATTRIBUTE, eval:0, pname:html4.2, name:xxxsecond, @:, value:2second 
+INFO: =============================================================================
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:3, type:DOT_NODE_ELEMENT, eval:0, pname:html3.1, name:html4.3, @:, value: 
+INFO: dot_parser_dump_tags(): |----> TAG: one 
+INFO: dot_parser_dump_tags(): |----> TAG: two 
+INFO: dot_parser_dump_tags(): |----> TAG: three 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:4, type:DOT_NODE_TEXTATTRIBUTE, eval:0, pname:html4.3, name:., @:, value:xyz1234 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:4, type:DOT_NODE_ATTRIBUTE, eval:0, pname:html4.3, name:first, @:, value:1first 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:4, type:DOT_NODE_ATTRIBUTE, eval:0, pname:html4.3, name:xxxsecond, @:, value:2second 
+INFO: =============================================================================
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:3, type:DOT_NODE_ELEMENT, eval:0, pname:html3.1, name:html5.0, @:, value: 
+INFO: dot_parser_dump_tags(): |----> TAG: one 
+INFO: dot_parser_dump_tags(): |----> TAG: two 
+INFO: dot_parser_dump_tags(): |----> TAG: three 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:4, type:DOT_NODE_TEXTATTRIBUTE, eval:0, pname:html5.0, name:., @:, value:xyz1234``n anoop kumar
+	`z`@ 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:4, type:DOT_NODE_ATTRIBUTE, eval:0, pname:html5.0, name:first, @:, value:1first 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:4, type:DOT_NODE_ATTRIBUTE, eval:0, pname:html5.0, name:xxxsecond, @:, value:2second 
+INFO: =============================================================================
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:2, type:DOT_NODE_ELEMENT, eval:0, pname:html3.1, name:html4.0, @:, value: 
+INFO: dot_parser_dump_tags(): |----> TAG: one,two 
+INFO: dot_parser_dump_tags(): |----> TAG: three 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:3, type:DOT_NODE_ATTRIBUTE, eval:0, pname:html4.0, name:kkkk, @:, value:xyz1234`
+ anoop kumar
+	`z`@ 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:3, type:DOT_NODE_ATTRIBUTE, eval:0, pname:html4.0, name:first, @:, value:1first 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:3, type:DOT_NODE_ATTRIBUTE, eval:0, pname:html4.0, name:xxxsecond, @:, value:2second 
+INFO: =============================================================================
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:1, type:DOT_NODE_ELEMENT, eval:0, pname:root, name:html5.1, @:, value: 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:2, type:DOT_NODE_ATTRIBUTE, eval:0, pname:html5.1, name:kkkk, @:, value:xyz1234`
+ anoop kumar
+	`z`@ #:one`,two,three 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:2, type:DOT_NODE_ATTRIBUTE, eval:0, pname:html5.1, name:first, @:, value:1first 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:2, type:DOT_NODE_ATTRIBUTE, eval:0, pname:html5.1, name:xxxsecond, @:, value:2second 
+INFO: =============================================================================
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:1, type:DOT_NODE_ELEMENT, eval:0, pname:root, name:html6.1, @:, value: 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:2, type:DOT_NODE_ATTRIBUTE, eval:0, pname:html6.1, name:kkkk:::::, @:, value:xyz1234`
+ anoop kumar
+	`z`@ #:one`,two,three 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:2, type:DOT_NODE_ATTRIBUTE, eval:0, pname:html6.1, name:first, @:, value:1first 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:2, type:DOT_NODE_ATTRIBUTE, eval:0, pname:html6.1, name:xxxsecond, @:, value:2second 
+INFO: =============================================================================
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:1, type:DOT_NODE_ELEMENT, eval:0, pname:root, name:html7.1, @:, value: 
+INFO: dot_parser_dump_tags(): |----> TAG: one 
+INFO: dot_parser_dump_tags(): |----> TAG: two 
+INFO: dot_parser_dump_tags(): |----> TAG: three,four five 
+INFO: =============================================================================
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:1, type:DOT_NODE_ELEMENT, eval:0, pname:root, name:html8, @:, value: 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:2, type:DOT_NODE_TEXTATTRIBUTE, eval:0, pname:html8, name:., @:, value:xyz1234 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:2, type:DOT_NODE_ATTRIBUTE, eval:0, pname:html8, name:first, @:, value:1first 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:2, type:DOT_NODE_ATTRIBUTE, eval:0, pname:html8, name:xxxsecond, @:, value:2second 
+INFO: =============================================================================
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:2, type:DOT_NODE_ELEMENT, eval:0, pname:html8, name:html8.1, @:, value: 
+INFO: dot_parser_dump_tags(): |----> TAG: one 
+INFO: dot_parser_dump_tags(): |----> TAG: two 
+INFO: dot_parser_dump_tags(): |----> TAG: three 
+INFO: dot_parser_dump_tags(): |----> TAG: four 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:3, type:DOT_NODE_TEXTATTRIBUTE, eval:0, pname:html8.1, name:., @:, value:xyz1234 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:3, type:DOT_NODE_ATTRIBUTE, eval:0, pname:html8.1, name:first, @:, value:1first 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:3, type:DOT_NODE_ATTRIBUTE, eval:0, pname:html8.1, name:xxxsecond, @:, value:2second 
+INFO: =============================================================================
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:3, type:DOT_NODE_ELEMENT, eval:0, pname:html8.1, name:html8.2, @:, value: 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:4, type:DOT_NODE_TEXTATTRIBUTE, eval:0, pname:html8.2, name:., @:, value:xyz1234 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:4, type:DOT_NODE_ATTRIBUTE, eval:0, pname:html8.2, name:first, @:, value:1first 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:4, type:DOT_NODE_ATTRIBUTE, eval:0, pname:html8.2, name:xxxsecond, @:, value:2second 
+INFO: =============================================================================
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:3, type:DOT_NODE_ELEMENT, eval:0, pname:html8.1, name:html8.3, @:, value: 
+INFO: dot_parser_dump_tags(): |----> TAG: one 
+INFO: dot_parser_dump_tags(): |----> TAG: two 
+INFO: dot_parser_dump_tags(): |----> TAG: three 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:4, type:DOT_NODE_TEXTATTRIBUTE, eval:0, pname:html8.3, name:., @:, value:xyz1234 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:4, type:DOT_NODE_ATTRIBUTE, eval:0, pname:html8.3, name:first, @:, value:1first 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:4, type:DOT_NODE_ATTRIBUTE, eval:0, pname:html8.3, name:xxxsecond, @:, value:2second 
+INFO: =============================================================================
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:4, type:DOT_NODE_ELEMENT, eval:0, pname:html8.3, name:html8.4, @:, value: 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:5, type:DOT_NODE_TEXTATTRIBUTE, eval:0, pname:html8.4, name:., @:, value:xyz1234 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:5, type:DOT_NODE_ATTRIBUTE, eval:0, pname:html8.4, name:first, @:, value:1first 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:5, type:DOT_NODE_ATTRIBUTE, eval:0, pname:html8.4, name:xxxsecond, @:, value:2second 
+INFO: =============================================================================
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:1, type:DOT_NODE_ELEMENT, eval:0, pname:root, name:html9, @:1234567, value: 
+INFO: dot_parser_dump_tags(): |----> TAG: d4 
+INFO: dot_parser_dump_tags(): |----> TAG: e5 
+INFO: dot_parser_dump_tags(): |----> TAG: f6 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:2, type:DOT_NODE_TEXTATTRIBUTE, eval:0, pname:html9, name:., @:, value:xyz5678 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:2, type:DOT_NODE_ATTRIBUTE, eval:0, pname:html9, name:first, @:, value:2first 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:2, type:DOT_NODE_ATTRIBUTE, eval:0, pname:html9, name:xxxsecond, @:, value:3second 
+INFO: =============================================================================
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:1, type:DOT_NODE_ELEMENT, eval:0, pname:root, name:html10, @:1234, value: 
+INFO: dot_parser_dump_tags(): |----> TAG: d4 
+INFO: dot_parser_dump_tags(): |----> TAG: e5 
+INFO: dot_parser_dump_tags(): |----> TAG: f6 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:2, type:DOT_NODE_TEXTATTRIBUTE, eval:0, pname:html10, name:., @:, value:xyz5678 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:2, type:DOT_NODE_ATTRIBUTE, eval:0, pname:html10, name:first, @:, value:2first 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:2, type:DOT_NODE_ATTRIBUTE, eval:0, pname:html10, name:xxxsecond, @:, value:3second 
+INFO: =============================================================================
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:2, type:DOT_NODE_ELEMENT, eval:0, pname:html10, name:body10, @:123xxx4, value: 
+INFO: dot_parser_dump_tags(): |----> TAG: d4 
+INFO: dot_parser_dump_tags(): |----> TAG: e5 
+INFO: dot_parser_dump_tags(): |----> TAG: f6 
+INFO: dot_parser_dump_tags(): |----> TAG: rtd4 
+INFO: dot_parser_dump_tags(): |----> TAG: re5 
+INFO: dot_parser_dump_tags(): |----> TAG: wf6 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:3, type:DOT_NODE_TEXTATTRIBUTE, eval:0, pname:body10, name:., @:, value:xyz5678 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:3, type:DOT_NODE_ATTRIBUTE, eval:0, pname:body10, name:first, @:, value:2first 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:3, type:DOT_NODE_ATTRIBUTE, eval:0, pname:body10, name:xxxsecond, @:, value:3second 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:3, type:DOT_NODE_TEXTATTRIBUTE, eval:0, pname:body10, name:., @:, value:xyz5678 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:3, type:DOT_NODE_ATTRIBUTE, eval:0, pname:body10, name:first, @:, value:2first 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:3, type:DOT_NODE_ATTRIBUTE, eval:0, pname:body10, name:xxxsecond, @:, value:3second 
+INFO: =============================================================================
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:1, type:DOT_NODE_ELEMENT, eval:0, pname:root, name:html5.1, @:, value: 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:2, type:DOT_NODE_ATTRIBUTE, eval:0, pname:html5.1, name:kkkk, @:, value:xyz1234`
+ anoop kumar
+	`z`@ #:one`,two,three 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:2, type:DOT_NODE_ATTRIBUTE, eval:0, pname:html5.1, name:first, @:, value:1first 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:2, type:DOT_NODE_ATTRIBUTE, eval:0, pname:html5.1, name:xxxsecond, @:, value:2second to none 
+INFO: =============================================================================
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:1, type:DOT_NODE_ELEMENT, eval:0, pname:root, name:html6.1, @:, value: 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:2, type:DOT_NODE_ATTRIBUTE, eval:0, pname:html6.1, name:kkkk:::::, @:, value:xyz1234`
+ anoop kumar
+	`z`@ #:one`,two,three 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:2, type:DOT_NODE_ATTRIBUTE, eval:0, pname:html6.1, name:first, @:, value:1first 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:2, type:DOT_NODE_ATTRIBUTE, eval:0, pname:html6.1, name:xxxsecond, @:, value:2second 
+INFO: =============================================================================
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:1, type:DOT_NODE_ELEMENT, eval:0, pname:root, name:html7.1, @:, value: 
+INFO: dot_parser_dump_tags(): |----> TAG: one 
+INFO: dot_parser_dump_tags(): |----> TAG: two 
+INFO: dot_parser_dump_tags(): |----> TAG: three,four five 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:2, type:DOT_NODE_ATTRIBUTE, eval:0, pname:html7.1, name:result, @:, value:`$anoop$$$ 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:2, type:DOT_NODE_ATTRIBUTE, eval:0, pname:html7.1, name:result2, @:, value: $value 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:2, type:DOT_NODE_ATTRIBUTE, eval:0, pname:html7.1, name:result3, @:, value:_$value2 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:2, type:DOT_NODE_ATTRIBUTE, eval:0, pname:html7.1, name:third, @:, value:3third 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:2, type:DOT_NODE_ATTRIBUTE, eval:0, pname:html7.1, name:fourth, @:, value:4fourth 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:2, type:DOT_NODE_ATTRIBUTE, eval:0, pname:html7.1, name:fifth, @:, value:5fifth 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:2, type:DOT_NODE_ATTRIBUTE, eval:0, pname:html7.1, name:1third, @:, value:3third 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:2, type:DOT_NODE_ATTRIBUTE, eval:0, pname:html7.1, name:2fourth, @:, value:4fourth 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:2, type:DOT_NODE_ATTRIBUTE, eval:0, pname:html7.1, name:4fifth, @:, value:5fifth 
+INFO: =============================================================================
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:2, type:DOT_NODE_ELEMENT, eval:0, pname:html7.1, name:Xyz, @:, value: 
+INFO: dot_parser_dump_tags(): |----> TAG: anoop 
+INFO: dot_parser_dump_tags(): |----> TAG: kumar,narayanan 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:3, type:DOT_NODE_ATTRIBUTE, eval:0, pname:Xyz, name:1third, @:, value:3third 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:3, type:DOT_NODE_ATTRIBUTE, eval:0, pname:Xyz, name:2fourth, @:, value:4fourth 
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:3, type:DOT_NODE_ATTRIBUTE, eval:0, pname:Xyz, name:4fifth, @:, value:5fifth 
+INFO: =============================================================================
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:1, type:DOT_NODE_MARKER, eval:0, pname:root, name:1234, @:, value: 
+INFO: =============================================================================
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:1, type:DOT_NODE_MARKER, eval:0, pname:root, name:xyz123, @:, value: 
+INFO: =============================================================================
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:1, type:DOT_NODE_MARKER, eval:0, pname:root, name:, @:, value: 
+INFO: =============================================================================
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:1, type:DOT_NODE_MARKER, eval:0, pname:root, name:, @:, value: 
+INFO: =============================================================================
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:1, type:DOT_NODE_MARKER, eval:0, pname:root, name:1234, @:, value: 
+INFO: =============================================================================
+INFO: -----------------------------------------------------------------------------
+INFO: dot_parser_dump_node(): depth:1, type:DOT_NODE_MARKER, eval:0, pname:root, name:xyz123, @:, value: 

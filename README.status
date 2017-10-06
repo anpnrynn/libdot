@@ -1,0 +1,12 @@
+This is the README.status file
+
+LIBRARY STATUS
+==============
+
+
+UNDER DEVELOPMENT
+-----------------
+The library is barely usable at this point in time. The implementation of DOT Operations are at 20%.
+So, if you plan to use this library don't use the DOT operations at this point in time.
+Right now only parse_line function is done. It cannot parse a DOT file at this point in time.
+Right now only DEBUG build has been tested.
