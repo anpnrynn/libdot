@@ -60,6 +60,6 @@ LT_INIT([win32-dll])
 
 AC_OUTPUT([
 Makefile
-src/libdot-0.1.pc
+src/libdot-0.2.pc
 src/Makefile
 po/Makefile.in])
