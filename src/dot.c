@@ -56,7 +56,7 @@ static void dot_node_delete(DOT_NODE_LIST *nodeTag) {
 	}
 }
 
-static void dot_node_list_dellist( DOT_NODE_LIST *nodeTag ){
+static void dot_node_list_delete( DOT_NODE_LIST *nodeTag ){
 	DOT_NODE_LIST *tmpTag = nodeTag;
 	while( nodeTag ){
 		tmpTag = nodeTag->nextNode;
@@ -76,7 +76,54 @@ DOT_NODE*   dot_node_new(){
 	return node;
 }
 
-void dot_node_deltree(DOT_NODE *node){
+static void dot_node_delete_fix_nodes ( DOT_NODE *node){
+	if( !node )
+		return;
+	if( node->dotNodePrevSibling ){
+		node->dotNodePrevSibling->dotNodeNextSibling = node->dotNodeNextSibling;
+	} else{
+		if( node->dotNodeNextSibling ){
+			node->dotNodeNextSibling->dotNodePrevSibling = 0;
+			if( node->dotNodeParent )
+				node->dotNodeParent->dotNodeFirstChild = node->dotNodeNextSibling;
+		}
+	}
+	if( node->dotNodeNextSibling ){
+		node->dotNodeNextSibling->dotNodePrevSibling = node->dotNodePrevSibling;
+	} else {
+		if( node->dotNodePrevSibling ){
+			node->dotNodePrevSibling->dotNodeNextSibling = 0;
+		}
+	}
+	node->dotNodePrevSibling = 0;
+	node->dotNodeNextSibling = 0;
+	node->dotNodeParent      = 0;
+}
+
+void dot_node_delete_tree(DOT_NODE *node, int freeUserData ){
+	if(!node)
+		return;
+	DOT_NODE *child = node->dotNodeFirstChild;
+	DOT_NODE *nextChild = 0;
+	while( child ){
+		nextChild = child->dotNodeNextSibling;
+		dot_node_delete_tree ( child, freeUserData );
+		child = nextChild;
+	}
+	if( node->tags )
+		dot_node_list_delete  ( node->tags);
+	if( node->list )
+		dot_node_list_delete  ( node->list );
+	if( node->dotNodeName )
+		free( node->dotNodeName );
+	if( node->dotNodeId )
+		free( node->dotNodeId );
+	if( node->dotNodeValue )
+		free( node->dotNodeValue );
+	if( freeUserData)
+		free( node->dotNodeUserData );
+	dot_node_delete_fix_nodes ( node );
+	free (node);
 }
 
 static void dot_node_merge_tags ( DOT_NODE *origNode, DOT_NODE_LIST *newTag ){
@@ -208,34 +255,39 @@ static void dot_node_attribute_plus_attribute_value ( DOT_NODE *marked, DOT_NODE
 
 static void dot_node_attribute_minus_attribute_value ( DOT_NODE *marked, DOT_NODE_LIST *list ){
 	char *attrName  = list->value;
-	char *attrIndex = list->nextNode?list->nextNode->value:0;
+	if( !attrName )
+		return;
+	if( strcmp(attrName, "#" ) == 0 ) {
+		dot_node_list_delete (marked->tags?marked->tags:0);
+		marked->tags = 0;
+		return;
+	}
+	int   removeAll = 0;
+	char *attrIndex = 0;
+	if( !list->nextNode )
+		removeAll = 1;
+	else
+		attrIndex = list->nextNode?list->nextNode->value:0;
 	int   attrIndexInt    = attrIndex?abs(atoi(attrIndex)):0;
 	int   curAttrIndexInt = 0;
-	DOT_NODE *tmpMarked = marked;
+	DOT_NODE *tmpMarked   = marked->dotNodeFirstChild;
+	DOT_NODE *tmpMarkedNext = 0;
 	while( tmpMarked ){
+		tmpMarkedNext = tmpMarked->dotNodeNextSibling;
 		if( tmpMarked->dotNodeType > DOT_NODE_ELEMENT &&
 		    tmpMarked->dotNodeType < DOT_NODE_MAXTYPE &&
 		    strcmp( tmpMarked->dotNodeName, attrName ) == 0 ){
-
-			if ( attrIndexInt != curAttrIndexInt ){
+			if ( !removeAll && attrIndexInt != curAttrIndexInt ){
 				curAttrIndexInt++;
-				tmpMarked = tmpMarked->dotNodeNextSibling;
+				tmpMarked = tmpMarkedNext;
 				continue;
 			}
-				
-			if ( tmpMarked->dotNodePrevSibling ){
-				tmpMarked->dotNodePrevSibling->dotNodeNextSibling = tmpMarked->dotNodeNextSibling;
-			} else {
-				tmpMarked->dotNodeParent->dotNodeFirstChild = tmpMarked->dotNodeNextSibling;
-			}
-			if ( tmpMarked->dotNodeNextSibling ){
-				tmpMarked->dotNodeNextSibling->dotNodePrevSibling = tmpMarked->dotNodePrevSibling;
-			}
-			tmpMarked->dotNodeNextSibling = 0;
-			tmpMarked->dotNodePrevSibling = 0;
-			dot_node_deltree (tmpMarked);
+			dot_node_delete_fix_nodes ( tmpMarked );	
+			dot_node_delete_tree(tmpMarked, 0);
+			if(!removeAll)
+				return;
 		}
-		tmpMarked = tmpMarked->dotNodeNextSibling;
+		tmpMarked = tmpMarkedNext;
 	}
 }
 
@@ -281,7 +333,8 @@ DOT_PARSER* dot_parser_new(){
 
 void        dot_parser_delete(DOT_PARSER *parser){
 	if( parser ) {
-		dot_node_deltree(parser->docRoot);
+		dot_node_delete_tree(parser->docRoot, 0);
+		bzero( parser, sizeof(DOT_PARSER) );
 		free(parser);
 	}
 }
@@ -832,6 +885,19 @@ int dot_parser_parse_line (DOT_PARSER *parser, char *line, unsigned int length )
 			node->dotNodeValue = strdup( parser->value );
 		}
 		node->list = dot_parser_parse_attribute_tags( &(parser->value[0]), "," );
+		if( parser->name && parser->name[0] ){
+			switch( parser->name[0] ){
+				case '+':
+						break;
+				case '-':
+						fprintf( stderr, "DBUG: Deleting Attribute with Name: %s \n", node->list?node->list->value:"");
+						dot_node_attribute_minus_attribute_value ( parser->toNode, node->list );
+						break;
+				default:
+						fprintf( stderr, "DBUG: Undefined Operation\n");
+						break;
+			}
+		}
 		dot_node_add_child (parser->docRoot, node, 0);
 		
 	} else 

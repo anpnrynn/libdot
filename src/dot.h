@@ -76,7 +76,7 @@ typedef struct _DOT_NODE{
 	struct _DOT_NODE  *dotNodeFirstChild;
 	struct _DOT_NODE  *dotNodeNextSibling;
 	struct _DOT_NODE  *dotNodePrevSibling;
-	void*             *dotUserData;
+	void*             *dotNodeUserData;
 }DOT_NODE;
 
 typedef enum _DOT_CURSOR {

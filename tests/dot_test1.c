@@ -14,12 +14,12 @@ int main () {
 	char *line006 = "\n";
 	char *line007 = "\r\n";
 	char *line008 = ".html first:1first second:2second        third:3third\n";
-	char *line009 = ".html1 @:xyz123 first:1first    second:2second        third:3third\n";
+	char *line009 = ".html1 @:xyz123 first:1first  first:2first first:3first first:4first   second:2second        third:3third\n";
 	char *line010 = ".html2 @:xyz1234 first:1first    second:2second        third:3third fourth:4fourth12345_this_will_do fifth: sixth: seventh: eighth:8th\n";
 	char *line011 = ".html3 .:xyz1234 first:1first    xxxsecond:2second  \n";
 	char *line012 = "..html3.1 .:xyz1234 #:one,two,three,four first:1first    xxxsecond:2second  \n";
 	char *line013 = "....html3.2 .:xyz1234 first:1first    xxxsecond:2second  \n";
-	char *line014 = "...html4.1 .:xyz1234 #:one,two,three first:1first    xxxsecond:2second  \n";
+	char *line014 = "...html4.1 @:delAll .:xyz1234 #:one,two,three first:1first first:new1   first:new2   first:new3      first:new4   xxxsecond:2second  \n";
 	char *line015 = "....+ third:3third fourth:4fourth fifth:5fifth  \n";
 	char *line016 = "....+ 1third:3third 2fourth:4fourth 4fifth:5fifth  \n";
 	char *line017 = ".....+ 1third:3third 2fourth:4fourth 4fifth:5fifth  \n";
@@ -61,6 +61,14 @@ int main () {
 	char *line049 = "@          1234\n";
 	char *line050 = "@             xyz123\n";
 	char *line051 = "#  +:first,0,first,0\n";
+	char *line052 = "#  -:first,0\n";
+	char *line053 = "#  -:first,2\n";
+	char *line054 = "#  -:first,0\n";
+	char *line055 = "#  -:first,0\n";
+	char *line056 = "#  -:.,0\n";
+	char *line057 = "#  -:#,0\n";
+	char *line058 = "@             delAll\n";
+	char *line059 = "#  -:first\n"; //Remove all attributes with name first
 	
 
 
@@ -179,8 +187,28 @@ int main () {
 	dot_parser_parse_line ( dotParser, buf, strlen(buf) );
 	strcpy( buf, line051);
 	dot_parser_parse_line ( dotParser, buf, strlen(buf) );
+	strcpy( buf, line052);
+	dot_parser_parse_line ( dotParser, buf, strlen(buf) );
+	strcpy( buf, line053);
+	dot_parser_parse_line ( dotParser, buf, strlen(buf) );
+	strcpy( buf, line054);
+	dot_parser_parse_line ( dotParser, buf, strlen(buf) );
+	strcpy( buf, line055);
+	dot_parser_parse_line ( dotParser, buf, strlen(buf) );
+	strcpy( buf, line056);
+	dot_parser_parse_line ( dotParser, buf, strlen(buf) );
+	strcpy( buf, line057);
+	dot_parser_parse_line ( dotParser, buf, strlen(buf) );
+	strcpy( buf, line058);
+	dot_parser_parse_line ( dotParser, buf, strlen(buf) );
+	strcpy( buf, line059);
+	dot_parser_parse_line ( dotParser, buf, strlen(buf) );
 
 	fprintf(stderr,"INFO: main(): ======================================================\n");
 	dot_parser_dump( dotParser->docRoot, 0 );
+
+	dot_parser_delete( dotParser );
+	//fprintf(stderr,"INFO: main(): ======================================================\n");
+	//dot_parser_dump( dotParser->docRoot, 0 );
 	return 0;
 }

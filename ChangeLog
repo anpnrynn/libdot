@@ -1,2 +1,6 @@
+CHANGELOG
+=========
 
+
+07/Oct/2017 - Added support for Delete Operation in libdot, now you can delete one attribute at an index or all attributes of an element after marking the node.
 
