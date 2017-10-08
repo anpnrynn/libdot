@@ -1,6 +1,7 @@
 CHANGELOG
 =========
 
+08/Oct/2017 - Added support for copy support functions, now parser object is required by all functions
 
 07/Oct/2017 - Added support for Delete Operation in libdot, now you can delete one attribute at an index or all attributes of an element after marking the node.
 

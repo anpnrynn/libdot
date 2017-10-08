@@ -104,6 +104,7 @@ typedef struct _DOT_PARSER{
 	unsigned int   buflen;
 	unsigned int   index;
 	unsigned int   line;
+	unsigned int   nodeCount;
 	unsigned int   location;
 	unsigned int   depth;
 	/*
@@ -133,10 +134,10 @@ int         dot_parser_parse_line (DOT_PARSER *, char *, unsigned int );
 
 int         dot_parser_parse_file (DOT_PARSER *, char * );
 
-int         dot_parser_dump ( DOT_NODE *, unsigned int );
+int         dot_parser_dump ( DOT_PARSER *parser, DOT_NODE *, unsigned int );
 
-unsigned int dot_parser_get_id_hash ( char * );
+unsigned int dot_parser_get_id_hash ( DOT_PARSER *parser, char * );
 
-DOT_NODE*   dot_parser_get_node ( DOT_NODE *node, char * );
+DOT_NODE*   dot_parser_get_node ( DOT_PARSER *parser, DOT_NODE *node, char * );
 
-DOT_NODE*   dot_parser_get_node_by_id ( DOT_NODE *node, char *, unsigned int );
+DOT_NODE*   dot_parser_get_node_by_id ( DOT_PARSER *parser, DOT_NODE *node, char *, unsigned int );

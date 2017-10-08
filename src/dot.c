@@ -31,6 +31,8 @@
 #include <string.h>
 #include <malloc.h>
 #include <stdlib.h>
+//#include <threads.h>
+//thread_local int foo = 0;
 #include <dot.h>
 
 
@@ -68,15 +70,62 @@ static void dot_node_list_delete( DOT_NODE_LIST *nodeTag ){
 	}
 }
 
-DOT_NODE*   dot_node_new(){
+static DOT_NODE_LIST *dot_node_list_duplicate( DOT_NODE_LIST *fromListNode ){
+	DOT_NODE_LIST *tmpListNode = 0, *tmpLastListNode = 0, *firstListNode = 0;
+	while( fromListNode ){
+		tmpListNode = dot_node_list_new ();
+		tmpListNode->value = fromListNode->value?strdup( fromListNode->value ):0;
+		if( !firstListNode )
+			firstListNode = tmpListNode;
+		if( tmpLastListNode ){
+			tmpLastListNode->nextNode = tmpListNode;
+		}
+		tmpLastListNode = tmpListNode;
+		fromListNode = fromListNode->nextNode;
+	}
+	return firstListNode;
+}
+
+static int dot_node_list_get_values ( DOT_NODE_LIST *list, char **value1, char **value2, char **value3, char **value4 ){
+	*value1 = *value2 = *value3 = *value4 = 0;
+	if (!list ){
+		return 0;
+	} else {
+		*value1 = list->value;
+		if( list->nextNode ){
+			*value2 = list->nextNode->value;
+			if( list->nextNode->nextNode ){
+				*value3 = list->nextNode->nextNode->value;
+				if( list->nextNode->nextNode->nextNode){
+					*value4 = list->nextNode->nextNode->nextNode->value;
+					return 4;
+				}
+				return 3;
+			}
+			return 2;
+		}
+		return 1;
+	}
+}
+
+DOT_NODE*   dot_node_new(DOT_PARSER *parser){
 	DOT_NODE *node = (DOT_NODE *)malloc(sizeof(DOT_NODE));
 	if( node ){
 		memset(node, 0, sizeof(DOT_NODE) );
+		(parser->nodeCount)++;
 	}
 	return node;
 }
 
-static void dot_node_delete_fix_nodes ( DOT_NODE *node){
+static char* dot_node_id_dup( DOT_PARSER *parser, char *id ){
+	char *dupId = 0;
+	int   n = strlen(id);
+	dupId = (char *) malloc ( n + 24 );
+	sprintf( dupId,"%s-%010d", id, parser->nodeCount  );
+	return dupId;
+}
+
+static void dot_node_delete_fix_nodes ( DOT_PARSER *parser, DOT_NODE *node){
 	if( !node )
 		return;
 	if( node->dotNodePrevSibling ){
@@ -100,14 +149,14 @@ static void dot_node_delete_fix_nodes ( DOT_NODE *node){
 	node->dotNodeParent      = 0;
 }
 
-void dot_node_delete_tree(DOT_NODE *node, int freeUserData ){
+void dot_node_delete_tree(DOT_PARSER *parser, DOT_NODE *node, int freeUserData ){
 	if(!node)
 		return;
 	DOT_NODE *child = node->dotNodeFirstChild;
 	DOT_NODE *nextChild = 0;
 	while( child ){
 		nextChild = child->dotNodeNextSibling;
-		dot_node_delete_tree ( child, freeUserData );
+		dot_node_delete_tree ( parser, child, freeUserData );
 		child = nextChild;
 	}
 	if( node->tags )
@@ -122,11 +171,11 @@ void dot_node_delete_tree(DOT_NODE *node, int freeUserData ){
 		free( node->dotNodeValue );
 	if( freeUserData)
 		free( node->dotNodeUserData );
-	dot_node_delete_fix_nodes ( node );
+	dot_node_delete_fix_nodes ( parser, node );
 	free (node);
 }
 
-static void dot_node_merge_tags ( DOT_NODE *origNode, DOT_NODE_LIST *newTag ){
+static void dot_node_merge_tags ( DOT_PARSER *parser, DOT_NODE *origNode, DOT_NODE_LIST *newTag ){
 	DOT_NODE_LIST *tag = origNode->tags;
 	DOT_NODE_LIST *lastTag = 0;
 	while( tag ){
@@ -139,7 +188,143 @@ static void dot_node_merge_tags ( DOT_NODE *origNode, DOT_NODE_LIST *newTag ){
 	return;
 }
 
-static void dot_node_add_child(DOT_NODE *parent, DOT_NODE *current, int isList ){
+static void dot_node_merge_list ( DOT_PARSER *parser, DOT_NODE *origNode, DOT_NODE_LIST *list ){
+	DOT_NODE_LIST *listNode = origNode->list;
+	DOT_NODE_LIST *lastListNode = 0;
+	while( listNode ){
+		lastListNode = listNode;
+		listNode = listNode->nextNode;
+	}
+	if (lastListNode){
+		lastListNode->nextNode = list;
+	}
+	return;
+}
+
+typedef enum _DOT_NODE_STRTYPE {
+	DOT_NODE_STR_NAME = 0,
+	DOT_NODE_STR_ID,
+	DOT_NODE_STR_VALUE,
+} DOT_NODE_STRTYPE;
+
+static void dot_node_merge_strings( DOT_PARSER *parser, DOT_NODE *toNode, DOT_NODE *fromNode, DOT_NODE_STRTYPE which ){
+	char **toString=0;
+	char **fromString=0;
+	if( toNode && fromNode ){
+		switch( which ){
+			case DOT_NODE_STR_NAME:
+				toString = &toNode->dotNodeName;
+				fromString = &fromNode->dotNodeName;
+				break;
+			case DOT_NODE_STR_ID:
+				toString = &toNode->dotNodeId;
+				fromString = &fromNode->dotNodeId;
+				break;
+			case DOT_NODE_STR_VALUE:
+				toString = &toNode->dotNodeValue;
+				fromString = &fromNode->dotNodeValue;
+				break;
+			default:
+				return;
+		}
+		
+	} else 
+	if ( fromNode ){
+		toString = 0;
+		switch( which ){
+			case DOT_NODE_STR_NAME:
+				fromString = &fromNode->dotNodeName;
+				break;
+			case DOT_NODE_STR_ID:
+				fromString = &fromNode->dotNodeId;
+				break;
+			case DOT_NODE_STR_VALUE:
+				fromString = &fromNode->dotNodeValue;
+				break;
+			default:
+				return;
+		}
+	} else {
+		return;
+	}
+
+	if( *toString ){
+		if( *fromString ){
+			*toString = (char*) realloc( *toString,
+			                              strlen(*toString) +
+			                              strlen(*fromString) +
+			                              1 );
+			strcat( *toString, *fromString );
+			return;
+		} else {
+			return; //nothing to do
+		}
+	} else {
+		if( *fromString ){
+			*toString = strdup( *fromString );
+			return;
+		} else {
+			return; //nothing to do
+		}
+	}
+}
+
+static inline void dot_node_copy(DOT_PARSER *parser, DOT_NODE *to, DOT_NODE *from, int depth){
+	if( to && from ){
+		to->dotNodeType           = from->dotNodeType;
+		to->dotNodeState          = from->dotNodeState;
+		to->dotNodeDepth          = depth;
+		to->dotNodeEvaluated      = from->dotNodeEvaluated;
+		to->dotNodeValueSize      = from->dotNodeValueSize; //set only for BLOBs
+		to->dotNodeIdHash         = from->dotNodeIdHash;    //to speed up marker lookup
+		to->dotNodeId             = from->dotNodeId?dot_node_id_dup(parser, from->dotNodeId):0;
+		to->dotNodeName           = from->dotNodeName?strdup(from->dotNodeName):0;
+		to->dotNodeValue          = from->dotNodeValue?strdup(from->dotNodeValue):0;
+		to->tags                  = dot_node_list_duplicate(from->tags);
+		to->list                  = dot_node_list_duplicate(from->list);
+		to->dotNodeParent         = 0;
+		to->dotNodeFirstChild     = 0;
+		to->dotNodeNextSibling    = 0;
+		to->dotNodePrevSibling    = 0;
+		to->dotNodeUserData       = from->dotNodeUserData;
+	} else 
+		return;
+}
+
+static DOT_NODE* dot_node_duplicate_node( DOT_PARSER *parser, DOT_NODE *dupNode, unsigned int depth ){
+	if ( dupNode ){
+		DOT_NODE *tmpNode = dot_node_new(parser);
+		dot_node_copy (parser, tmpNode, dupNode, depth+1);
+		return tmpNode;
+	}
+	return 0;
+}
+
+static DOT_NODE* dot_node_duplicate_tree( DOT_PARSER *parser, DOT_NODE *parent, DOT_NODE *dupNode, unsigned int depth ){
+	if(! dupNode )
+		return 0;
+	else{
+		DOT_NODE *tmpFirstChild = 0;
+		DOT_NODE *tmpLastNode   = 0;
+		while( dupNode ){
+			DOT_NODE *tmpNode = dot_node_new(parser);
+			if( !tmpFirstChild )
+				tmpFirstChild = tmpNode;
+			dot_node_copy (parser, tmpNode, dupNode, depth+1);
+			tmpNode->dotNodeParent = parent;
+			tmpNode->dotNodeFirstChild = dot_node_duplicate_tree ( parser, tmpNode, dupNode->dotNodeFirstChild, depth+1);
+			if( tmpLastNode ) {
+				tmpLastNode->dotNodeNextSibling = tmpNode;
+				tmpNode->dotNodePrevSibling = tmpLastNode;
+			}
+			tmpLastNode = tmpNode;
+			dupNode = dupNode->dotNodeNextSibling;
+		}
+		return tmpFirstChild;
+	}
+}
+
+static void dot_node_add_child(DOT_PARSER *parser, DOT_NODE *parent, DOT_NODE *current, int isList ){
 	if(!current)
 		return;
 	DOT_NODE *child = parent->dotNodeFirstChild;
@@ -174,7 +359,7 @@ static void dot_node_add_child(DOT_NODE *parent, DOT_NODE *current, int isList )
 	return;
 }
 
-static DOT_NODE *dot_node_attribute_find( DOT_NODE *start, char *attrName, char *attrIndex ){
+static DOT_NODE *dot_node_attribute_find( DOT_PARSER *parser, DOT_NODE *start, char *attrName, char *attrIndex ){
 	DOT_NODE *tmpStart = start;
 	int   attrIndexInt    = attrIndex?abs(atoi(attrIndex)):0;
 	int   curAttrIndexInt = 0;
@@ -196,7 +381,8 @@ static DOT_NODE *dot_node_attribute_find( DOT_NODE *start, char *attrName, char 
 	return 0;
 }
 
-static void dot_node_attribute_plus_attribute_value ( DOT_NODE *marked, DOT_NODE *markedFrom, DOT_NODE_LIST *list ){
+
+static void dot_node_attribute_plus_attribute_value ( DOT_PARSER *parser, DOT_NODE *marked, DOT_NODE *markedFrom, DOT_NODE_LIST *list ){
 	char *attrName = list->value;
 	if(!attrName)
 		return;
@@ -213,7 +399,7 @@ static void dot_node_attribute_plus_attribute_value ( DOT_NODE *marked, DOT_NODE
 		char *attrIndex2 = secondAttr->nextNode?secondAttr->nextNode->value:0;
 		if(!attrIndex2) {
 			// Assume this is append to toAttrNode and the 3rd param is actually a value.
-			DOT_NODE *toAttrNode = dot_node_attribute_find (marked->dotNodeFirstChild, attrName, attrIndex  );
+			DOT_NODE *toAttrNode = dot_node_attribute_find (parser, marked->dotNodeFirstChild, attrName, attrIndex  );
 			if(!toAttrNode)
 				return;
 			if( toAttrNode->dotNodeValue ){
@@ -228,10 +414,10 @@ static void dot_node_attribute_plus_attribute_value ( DOT_NODE *marked, DOT_NODE
 			}
 		} else {
 			// All 4 values present, merge or copy the value fromAttrNode to toAttrNode
-			DOT_NODE *toAttrNode = dot_node_attribute_find (marked->dotNodeFirstChild, attrName, attrIndex  );
+			DOT_NODE *toAttrNode = dot_node_attribute_find (parser, marked->dotNodeFirstChild, attrName, attrIndex  );
 			if(!toAttrNode)
 				return;
-			DOT_NODE *fromAttrNode = dot_node_attribute_find (markedFrom, attrName2, attrIndex2);
+			DOT_NODE *fromAttrNode = dot_node_attribute_find (parser, markedFrom, attrName2, attrIndex2);
 			if(!fromAttrNode)
 				return;
 			if( toAttrNode->dotNodeValue && fromAttrNode->dotNodeValue ) {
@@ -253,7 +439,7 @@ static void dot_node_attribute_plus_attribute_value ( DOT_NODE *marked, DOT_NODE
 	}
 }
 
-static void dot_node_attribute_minus_attribute_value ( DOT_NODE *marked, DOT_NODE_LIST *list ){
+static void dot_node_attribute_minus_attribute_value ( DOT_PARSER *parser, DOT_NODE *marked, DOT_NODE_LIST *list ){
 	char *attrName  = list->value;
 	if( !attrName )
 		return;
@@ -282,8 +468,8 @@ static void dot_node_attribute_minus_attribute_value ( DOT_NODE *marked, DOT_NOD
 				tmpMarked = tmpMarkedNext;
 				continue;
 			}
-			dot_node_delete_fix_nodes ( tmpMarked );	
-			dot_node_delete_tree(tmpMarked, 0);
+			dot_node_delete_fix_nodes (parser, tmpMarked );	
+			dot_node_delete_tree(parser, tmpMarked, 0);
 			if(!removeAll)
 				return;
 		}
@@ -291,10 +477,10 @@ static void dot_node_attribute_minus_attribute_value ( DOT_NODE *marked, DOT_NOD
 	}
 }
 
-static void dot_node_merge  (DOT_NODE *original, DOT_NODE *current ){
+static void dot_node_merge  (DOT_PARSER *parser, DOT_NODE *original, DOT_NODE *current ){
 
-	dot_node_merge_tags (original, current->tags );
-	dot_node_add_child  (original, current->dotNodeFirstChild, 1 );
+	dot_node_merge_tags (parser, original, current->tags );
+	dot_node_add_child  (parser, original, current->dotNodeFirstChild, 1 );
 //	#if 0
 	original->dotNodeState = current->dotNodeState;
 	char * origval = original->dotNodeValue;
@@ -325,7 +511,7 @@ DOT_PARSER* dot_parser_new(){
 		memset(parser, 0, sizeof(DOT_PARSER) );
 		parser->lastc = '\n';
 	}
-	parser->docRoot = dot_node_new ();
+	parser->docRoot = dot_node_new (parser);
 	parser->docRoot->dotNodeName = strdup("root");
 	parser->docRoot->dotNodeType = DOT_NODE_ROOT;
 	return parser;
@@ -333,7 +519,7 @@ DOT_PARSER* dot_parser_new(){
 
 void        dot_parser_delete(DOT_PARSER *parser){
 	if( parser ) {
-		dot_node_delete_tree(parser->docRoot, 0);
+		dot_node_delete_tree(parser, parser->docRoot, 0);
 		bzero( parser, sizeof(DOT_PARSER) );
 		free(parser);
 	}
@@ -360,21 +546,21 @@ DOT_NODE*   dot_parser_get_current_node ( DOT_PARSER *parser){
 	return 0;
 }
 
-static inline DOT_NODE*    dot_parser_get_node_compare ( DOT_NODE *node, char *str ){
+static inline DOT_NODE*    dot_parser_get_node_compare ( DOT_PARSER *parser, DOT_NODE *node, char *str ){
 	if ( strcmp( node->dotNodeName?node->dotNodeName:"", str) == 0 )
 		return node;
 	else
 		return 0;
 }
 
-DOT_NODE*    dot_parser_get_node ( DOT_NODE *node, char *str ){
+DOT_NODE*    dot_parser_get_node ( DOT_PARSER *parser, DOT_NODE *node, char *str ){
 	if( node ){
 		DOT_NODE * tmpNode = node, * searchResult = 0;
 		do {
-			if ( searchResult = dot_parser_get_node_compare (tmpNode, str) )
+			if ( searchResult = dot_parser_get_node_compare (parser, tmpNode, str) )
 				return searchResult;
 			if ( tmpNode->dotNodeFirstChild ){
-				dot_parser_get_node (tmpNode->dotNodeFirstChild, str);
+				dot_parser_get_node (parser, tmpNode->dotNodeFirstChild, str);
 			}
 			tmpNode = tmpNode->dotNodeNextSibling;
 		}while ( tmpNode );
@@ -386,7 +572,7 @@ const unsigned int magic = 0x1a2b3c4d;
 
 
 //A simple 32bit XOR hash
-inline unsigned int dot_parser_get_id_hash( char *str){
+inline unsigned int dot_parser_get_id_hash( DOT_PARSER *parser, char *str){
 	unsigned int   hash = magic;
 	unsigned char *hashPtr = (unsigned char *)&hash;
 	int hashIndex = 0;
@@ -403,7 +589,7 @@ inline unsigned int dot_parser_get_id_hash( char *str){
 	return hash;
 }
 
-static inline DOT_NODE*    dot_parser_get_node_compare_by_id ( DOT_NODE *node, char *str , unsigned int hash){
+static inline DOT_NODE*    dot_parser_get_node_compare_by_id ( DOT_PARSER *parser, DOT_NODE *node, char *str , unsigned int hash){
 	if ( hash == node->dotNodeIdHash ){
 		if ( strcmp( node->dotNodeId?node->dotNodeId:"", str) == 0 )
 			return node;
@@ -414,14 +600,14 @@ static inline DOT_NODE*    dot_parser_get_node_compare_by_id ( DOT_NODE *node, c
 	}
 }
 
-DOT_NODE*    dot_parser_get_node_by_id ( DOT_NODE *node, char *str, unsigned int hash ){
+DOT_NODE*    dot_parser_get_node_by_id ( DOT_PARSER *parser, DOT_NODE *node, char *str, unsigned int hash ){
 	if( node ){
 		DOT_NODE * tmpNode = node, * searchResult = 0;
 		do {
-			if ( searchResult = dot_parser_get_node_compare_by_id (tmpNode, str, hash) )
+			if ( searchResult = dot_parser_get_node_compare_by_id (parser, tmpNode, str, hash) )
 				return searchResult;
 			if ( tmpNode->dotNodeFirstChild ){
-				searchResult = dot_parser_get_node_by_id (tmpNode->dotNodeFirstChild, str, hash);
+				searchResult = dot_parser_get_node_by_id (parser, tmpNode->dotNodeFirstChild, str, hash);
 				if ( searchResult )
 					return searchResult;
 			}
@@ -511,7 +697,7 @@ static int strcpy_till_char( char *result, char *line, char separator ){
 	return i;
 }
 
-static DOT_NODE_LIST * dot_parser_parse_attribute_tags ( char *tags, char* separator ){
+static DOT_NODE_LIST * dot_parser_parse_attribute_tags ( DOT_PARSER *parser, char *tags, char* separator ){
 	DOT_NODE_LIST *tag = 0, *oldTag = 0, *rootTag = 0;
 	if( !tags || tags[0] == ' ')
 		return 0;
@@ -585,12 +771,12 @@ int dot_parser_parse_line (DOT_PARSER *parser, char *line, unsigned int length )
 		if ( line[length-2] == '\r') 
 			line[length-2] = 0;
 		char *comment  = strdup(line);
-		DOT_NODE *node = dot_node_new ();
+		DOT_NODE *node = dot_node_new (parser);
 		node->dotNodeValue  = comment;
 		node->dotNodeType   = DOT_NODE_COMMENT;
 		node->dotNodeDepth  = 1;
 		node->dotNodeParent = parser->docRoot;
-		dot_node_add_child (parser->docRoot, node, 0);
+		dot_node_add_child (parser, parser->docRoot, node, 0);
 	} else
 	if ( line[0] == '.' ) {
 		//its not comment line
@@ -643,7 +829,7 @@ int dot_parser_parse_line (DOT_PARSER *parser, char *line, unsigned int length )
 			parser->lastNode = 0;
 			return 0;
 		} else {
-			thisNode = dot_node_new ();
+			thisNode = dot_node_new (parser);
 		}
 
 		if ( dotLineType == DOT_LINE_ELEMENT ) {
@@ -677,14 +863,14 @@ int dot_parser_parse_line (DOT_PARSER *parser, char *line, unsigned int length )
 								switch ( parser->name[0] ){
 									case '@':
 										{
-											unsigned int hash = dot_parser_get_id_hash (parser->value);
-											DOT_NODE *idNode = dot_parser_get_node_by_id (parser->docRoot, parser->value, hash );
+											unsigned int hash = dot_parser_get_id_hash (parser, parser->value);
+											DOT_NODE *idNode = dot_parser_get_node_by_id (parser, parser->docRoot, parser->value, hash );
 											fprintf( stderr, "DBUG: dot_parser_parse_line(): Detected id in node, Looking up %s %s\n",
 											        parser->value,idNode?"Successful":"Unsuccessful");
 											if( idNode && idNode->dotNodeType == thisNode->dotNodeType && 
 											   strcmp(idNode->dotNodeName, thisNode->dotNodeName) == 0 ){
 												parser->lastNode = previousNode;
-												dot_node_merge (idNode, thisNode);
+												dot_node_merge (parser, idNode, thisNode);
 												parser->previousNode = previousNode = idNode->dotNodePrevSibling;
 												parser->currentNode  = thisNode     = idNode;
 												dotLineType = DOT_LINE_ELEMENTLINK;
@@ -699,9 +885,9 @@ int dot_parser_parse_line (DOT_PARSER *parser, char *line, unsigned int length )
 									case '#':
 										fprintf( stderr, "DBUG: dot_parser_parse_line(): Detected tags in node \n");
 										//indexOffset = strcpy_till_char ( parser->value, &line[curIndex], ' ' );
-										tags = dot_parser_parse_attribute_tags( &(parser->value[0]), "," );
+										tags = dot_parser_parse_attribute_tags( parser, &(parser->value[0]), "," );
 										if ( thisNode->tags ){
-											dot_node_merge_tags (thisNode, tags);
+											dot_node_merge_tags (parser, thisNode, tags);
 										} else {
 											thisNode->tags = tags;
 										}
@@ -714,7 +900,7 @@ int dot_parser_parse_line (DOT_PARSER *parser, char *line, unsigned int length )
 										break;
 									case '.':
 										{
-											childNode = dot_node_new ();
+											childNode = dot_node_new (parser);
 											childNode->dotNodeType  = DOT_NODE_TEXTATTRIBUTE;
 											childNode->dotNodeDepth = thisNode->dotNodeDepth + 1;
 											childNode->dotNodeName  = strdup(parser->name);
@@ -728,7 +914,7 @@ int dot_parser_parse_line (DOT_PARSER *parser, char *line, unsigned int length )
 										break;
 								}
 							} else {
-								childNode = dot_node_new ();
+								childNode = dot_node_new (parser);
 								childNode->dotNodeType  = DOT_NODE_ATTRIBUTE;
 								childNode->dotNodeDepth = thisNode->dotNodeDepth + 1;
 								childNode->dotNodeName  = strdup(parser->name);
@@ -738,7 +924,7 @@ int dot_parser_parse_line (DOT_PARSER *parser, char *line, unsigned int length )
 							}
 						}
 						if( childNode ){
-							dot_node_add_child ( thisNode, childNode, 0 );
+							dot_node_add_child ( parser, thisNode, childNode, 0 );
 						}
 						if ( curIndex >= length || line[curIndex] == 0 )
 							break;
@@ -755,15 +941,15 @@ int dot_parser_parse_line (DOT_PARSER *parser, char *line, unsigned int length )
 		if( dotLineType == DOT_LINE_ELEMENT ) { 
 			if ( previousNode ) {
 				if ( previousNode->dotNodeDepth == thisNode->dotNodeDepth - 1 ){
-					dot_node_add_child (previousNode, thisNode, 0);
+					dot_node_add_child (parser, previousNode, thisNode, 0);
 					fprintf( stderr, "WARN: dot_parser_parse_line(): Reached here 7\n");
 				} else
 				if ( previousNode->dotNodeDepth == thisNode->dotNodeDepth ){
-					dot_node_add_child (previousNode->dotNodeParent, thisNode, 0);
+					dot_node_add_child (parser, previousNode->dotNodeParent, thisNode, 0);
 					fprintf( stderr, "WARN: dot_parser_parse_line(): Reached here 8\n");
 				} else {
 					if ( thisNode->dotNodeDepth == 1 ){
-						dot_node_add_child (parser->docRoot, thisNode, 0);
+						dot_node_add_child (parser, parser->docRoot, thisNode, 0);
 						fprintf( stderr, "WARN: dot_parser_parse_line(): Reached here 9\n");
 					} else {
 						int depthDiff = previousNode->dotNodeDepth - thisNode->dotNodeDepth;
@@ -775,22 +961,22 @@ int dot_parser_parse_line (DOT_PARSER *parser, char *line, unsigned int length )
 							}
 							if ( tmpNode ) {
 								fprintf( stderr, "WARN: dot_parser_parse_line(): Reached here 10\n");
-								dot_node_add_child (tmpNode, thisNode, 0);
+								dot_node_add_child (parser, tmpNode, thisNode, 0);
 							} else {
 								fprintf( stderr, "WARN: dot_parser_parse_line(): Didn't find suitable parent node, adding to docRoot\n");
-								dot_node_add_child (parser->docRoot, thisNode, 0);
+								dot_node_add_child (parser, parser->docRoot, thisNode, 0);
 							}
 						} else if ( depthDiff < 0 ){
 							fprintf( stderr, "WARN: dot_parser_parse_line(): Current node is higher than previous node by a depth > 1\n");
 							//need to free the node here
 						} else {
-							dot_node_add_child (parser->docRoot, thisNode, 0);
+							dot_node_add_child (parser, parser->docRoot, thisNode, 0);
 						}
 					}
 				}
 			} else {
 				if( thisNode->dotNodeDepth == 1 ) {
-					dot_node_add_child (parser->docRoot, thisNode, 0);
+					dot_node_add_child (parser, parser->docRoot, thisNode, 0);
 				} else {
 					fprintf( stderr, "WARN: dot_parser_parse_line(): The first dot node doesn't have depth of 1 \n");
 					//Need to free up memory
@@ -803,11 +989,11 @@ int dot_parser_parse_line (DOT_PARSER *parser, char *line, unsigned int length )
 		//its not dot line
 		//its a empty line
 		fprintf( stderr, "DBUG: dot_parser_parse_line(): Detected empty line \n");
-		DOT_NODE *node = dot_node_new ();
+		DOT_NODE *node = dot_node_new (parser);
 		node->dotNodeType   = DOT_NODE_EMPTY;
 		node->dotNodeDepth  = 1;
 		node->dotNodeParent = parser->docRoot;
-		dot_node_add_child (parser->docRoot, node, 0);
+		dot_node_add_child (parser, parser->docRoot, node, 0);
 	}else 
 	if ( line[0] == '@' && line[1] == ' ' ){
 
@@ -830,8 +1016,8 @@ int dot_parser_parse_line (DOT_PARSER *parser, char *line, unsigned int length )
 			
 			indexOffset += strcpy_till_char ( parser->name, &line[indexOffset], ' ' );
 			fprintf( stderr, "DBUG: dot_parser_parse_line(): Detected marker selector @%s dot  line \n", parser->name?parser->name:"");
-			unsigned int hash = dot_parser_get_id_hash (parser->name);
-			DOT_NODE *realNode = dot_parser_get_node_by_id (parser->docRoot, parser->name, hash );
+			unsigned int hash = dot_parser_get_id_hash (parser, parser->name);
+			DOT_NODE *realNode = dot_parser_get_node_by_id (parser, parser->docRoot, parser->name, hash );
 			if( realNode ){
 				if( parser->toNode ){
 					parser->fromNode = parser->toNode;
@@ -839,14 +1025,14 @@ int dot_parser_parse_line (DOT_PARSER *parser, char *line, unsigned int length )
 				parser->toNode = realNode;
 			}
 		}
-		DOT_NODE *node = dot_node_new ();
+		DOT_NODE *node = dot_node_new (parser);
 		node->dotNodeType   = DOT_NODE_MARKER;
 		node->dotNodeDepth  = 1;
 		node->dotNodeParent = parser->docRoot;
 		if( parser->name && parser->name[0] ){
 			node->dotNodeName = strdup( parser->name );
 		}
-		dot_node_add_child (parser->docRoot, node, 0);
+		dot_node_add_child (parser, parser->docRoot, node, 0);
 	} else 
 	if ( line[0] == '#' && line[1] == ' ' ){
 		fprintf( stderr, "DBUG: dot_parser_parse_line(): Detected operation line \n");
@@ -874,7 +1060,7 @@ int dot_parser_parse_line (DOT_PARSER *parser, char *line, unsigned int length )
 			        );
 		}
 
-		DOT_NODE *node = dot_node_new ();
+		DOT_NODE *node = dot_node_new (parser);
 		node->dotNodeType   = DOT_NODE_OPERATION;
 		node->dotNodeDepth  = 1;
 		node->dotNodeParent = parser->docRoot;
@@ -884,21 +1070,21 @@ int dot_parser_parse_line (DOT_PARSER *parser, char *line, unsigned int length )
 		if( parser->value && parser->value[0] ){
 			node->dotNodeValue = strdup( parser->value );
 		}
-		node->list = dot_parser_parse_attribute_tags( &(parser->value[0]), "," );
+		node->list = dot_parser_parse_attribute_tags( parser, &(parser->value[0]), "," );
 		if( parser->name && parser->name[0] ){
 			switch( parser->name[0] ){
 				case '+':
 						break;
 				case '-':
 						fprintf( stderr, "DBUG: Deleting Attribute with Name: %s \n", node->list?node->list->value:"");
-						dot_node_attribute_minus_attribute_value ( parser->toNode, node->list );
+						dot_node_attribute_minus_attribute_value (parser, parser->toNode, node->list );
 						break;
 				default:
 						fprintf( stderr, "DBUG: Undefined Operation\n");
 						break;
 			}
 		}
-		dot_node_add_child (parser->docRoot, node, 0);
+		dot_node_add_child (parser, parser->docRoot, node, 0);
 		
 	} else 
 	{
@@ -915,13 +1101,13 @@ int dot_parser_parse_line (DOT_PARSER *parser, char *line, unsigned int length )
 			line[length-2] = 0;
 		int chars = strcpy_till_char ( parser->name , line, ':' );
 		strcpy( parser->value, &line[chars] ) ;
-		DOT_NODE *node = dot_node_new ();
+		DOT_NODE *node = dot_node_new (parser);
 		node->dotNodeName   = strdup(parser->name);
 		node->dotNodeValue  = strdup(parser->value);
 		node->dotNodeType   = DOT_NODE_CONFIGURATION;
 		node->dotNodeDepth  = 1;
 		node->dotNodeParent = parser->docRoot;
-		dot_node_add_child (parser->docRoot, node, 0);
+		dot_node_add_child (parser, parser->docRoot, node, 0);
 	}
 }
 
@@ -932,7 +1118,7 @@ int         dot_parser_parse_file (DOT_PARSER *parser, char *filename) {
 	return 1;
 }
 
-int         dot_parser_dump_lists ( DOT_NODE *node ) {
+int         dot_parser_dump_lists ( DOT_PARSER *parser, DOT_NODE *node ) {
 	if(!node)
 		return 1;
 	DOT_NODE_LIST *tags = node->tags;
@@ -956,7 +1142,7 @@ int         dot_parser_dump_lists ( DOT_NODE *node ) {
 	return 0;
 }
 
-char*       dot_parser_dump_node_type( unsigned int type ){
+char*       dot_parser_dump_node_type( DOT_PARSER *parser, unsigned int type ){
 	static char *dotNodeTypeInvalid = "INVALID NODE TYPE";
 	static char *dotNodeTypeStr[DOT_NODE_MAXTYPE + 1] = {
 		 "DOT_NODE_ROOT",   //DOT node root node
@@ -985,7 +1171,7 @@ char*       dot_parser_dump_node_type( unsigned int type ){
 }
 
 
-int         dot_parser_dump_node ( DOT_NODE *node, unsigned options ){
+int         dot_parser_dump_node ( DOT_PARSER *parser, DOT_NODE *node, unsigned options ){
 	/*
 	  	unsigned int      dotNodeDepth;
 		unsigned int      dotNodeEvaluated;
@@ -999,7 +1185,7 @@ int         dot_parser_dump_node ( DOT_NODE *node, unsigned options ){
 		fprintf ( stderr, "INFO: -----------------------------------------------------------------------------\n");
 		fprintf ( stderr, "INFO: dot_parser_dump_node(): depth:%u, type:%s, eval:%u, pname:%s, name:%s, @:%s, value:%s \n",
 	     											node->dotNodeDepth,
-		     										dot_parser_dump_node_type (node->dotNodeType),
+		     										dot_parser_dump_node_type (parser, node->dotNodeType),
 	     											node->dotNodeEvaluated,
 		     										node->dotNodeParent?(node->dotNodeParent->dotNodeName?node->dotNodeParent->dotNodeName:""):"",
 	     											node->dotNodeName?node->dotNodeName:"",
@@ -1008,14 +1194,14 @@ int         dot_parser_dump_node ( DOT_NODE *node, unsigned options ){
 	}
 }
 
-int         dot_parser_dump ( DOT_NODE *node, unsigned int options ){
+int         dot_parser_dump ( DOT_PARSER *parser, DOT_NODE *node, unsigned int options ){
 	if( node ){
 		DOT_NODE * tmpNode = node;
 		do {
-			dot_parser_dump_node (tmpNode, options);
-			dot_parser_dump_lists (tmpNode);
+			dot_parser_dump_node (parser, tmpNode, options);
+			dot_parser_dump_lists (parser, tmpNode);
 			if ( tmpNode->dotNodeFirstChild ){
-				dot_parser_dump (tmpNode->dotNodeFirstChild, options);
+				dot_parser_dump (parser, tmpNode->dotNodeFirstChild, options);
 			}
 			tmpNode = tmpNode->dotNodeNextSibling;
 		}while ( tmpNode );

@@ -1,7 +1,7 @@
 dnl Process this file with autoconf to produce a configure script.
 dnl Created by Anjuta application wizard.
 
-AC_INIT(libdot, 0.2)
+AC_INIT(libdot, 0.3)
 
 AC_CONFIG_HEADERS([config.h])
 
@@ -60,6 +60,6 @@ LT_INIT([win32-dll])
 
 AC_OUTPUT([
 Makefile
-src/libdot-0.2.pc
+src/libdot-0.1.pc
 src/Makefile
 po/Makefile.in])
