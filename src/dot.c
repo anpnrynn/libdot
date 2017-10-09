@@ -275,11 +275,23 @@ static inline void dot_node_copy(DOT_PARSER *parser, DOT_NODE *to, DOT_NODE *fro
 		to->dotNodeState          = from->dotNodeState;
 		to->dotNodeDepth          = depth;
 		to->dotNodeEvaluated      = from->dotNodeEvaluated;
-		to->dotNodeValueSize      = from->dotNodeValueSize; //set only for BLOBs
-		to->dotNodeIdHash         = from->dotNodeIdHash;    //to speed up marker lookup
+		
 		to->dotNodeId             = from->dotNodeId?dot_node_id_dup(parser, from->dotNodeId):0;
+		to->dotNodeIdHash         = to->dotNodeId?dot_parser_get_id_hash( parser, to->dotNodeId ):0;
 		to->dotNodeName           = from->dotNodeName?strdup(from->dotNodeName):0;
-		to->dotNodeValue          = from->dotNodeValue?strdup(from->dotNodeValue):0;
+		switch ( from->dotNodeType ){
+			case DOT_NODE_ATTRIBUTE:
+			case DOT_NODE_TEXTATTRIBUTE:
+					to->dotNodeValue          = from->dotNodeValue?strdup(from->dotNodeValue):0;
+					break;
+			case DOT_NODE_CLOBATTRIBUTE:
+			case DOT_NODE_BLOBATTRIBUTE:
+					to->dotNodeValueSize      = from->dotNodeValueSize; //set only for BLOBs
+					to->dotNodeValue = (char*) malloc ( from->dotNodeValueSize );
+					memcpy( to->dotNodeValue, from->dotNodeValue, from->dotNodeValueSize );
+					break;
+		}
+		
 		to->tags                  = dot_node_list_duplicate(from->tags);
 		to->list                  = dot_node_list_duplicate(from->list);
 		to->dotNodeParent         = 0;
@@ -301,7 +313,7 @@ static DOT_NODE* dot_node_duplicate_node( DOT_PARSER *parser, DOT_NODE *dupNode,
 }
 
 static DOT_NODE* dot_node_duplicate_tree( DOT_PARSER *parser, DOT_NODE *parent, DOT_NODE *dupNode, unsigned int depth ){
-	if(! dupNode )
+	if(! dupNode || !parent )
 		return 0;
 	else{
 		DOT_NODE *tmpFirstChild = 0;
@@ -381,8 +393,320 @@ static DOT_NODE *dot_node_attribute_find( DOT_PARSER *parser, DOT_NODE *start, c
 	return 0;
 }
 
+static void dot_node_attribute_value_value_merge ( DOT_PARSER *parser, DOT_NODE *to, char *value ){
+	if( to->dotNodeValue && value ){
+		to->dotNodeValue = (char*) realloc( to->dotNodeValue, strlen( to->dotNodeValue ) + strlen(value) + 1 );
+		strcat ( to->dotNodeValue, value );
+	} else
+	if ( value ){
+		to->dotNodeValue = strdup( value );
+	}
+}
+
+static void dot_node_attribute_tags_tags_merge ( DOT_PARSER *parser, DOT_NODE *to, DOT_NODE_LIST *list ){
+	if( to->tags && list ){
+		//to->dotNodeValue = (char*) realloc( to->dotNodeValue, strlen( to->dotNodeValue ) + strlen(value) + 1 );
+		//strcat ( to->dotNodeValue, value );
+		DOT_NODE_LIST *dupList = dot_node_list_duplicate (list);
+		dot_node_merge_list (parser, to, dupList);
+	} else
+	if ( list ){
+		//to->dotNodeValue = strdup( value );
+		DOT_NODE_LIST *dupList = dot_node_list_duplicate (list);
+		to->tags = dupList;
+	}
+}
+
+static void dot_node_attribute_list_list_merge ( DOT_PARSER *parser, DOT_NODE *to, DOT_NODE_LIST *list ){
+	if( to->tags && list ){
+		//to->dotNodeValue = (char*) realloc( to->dotNodeValue, strlen( to->dotNodeValue ) + strlen(value) + 1 );
+		//strcat ( to->dotNodeValue, value );
+		DOT_NODE_LIST *dupList = dot_node_list_duplicate (list);
+		dot_node_merge_list (parser, to, dupList);
+	} else
+	if ( list ){
+		//to->dotNodeValue = strdup( value );
+		DOT_NODE_LIST *dupList = dot_node_list_duplicate (list);
+		to->tags = dupList;
+	}
+}
+
+static void dot_node_attribute_node_node_merge ( DOT_PARSER *parser, DOT_NODE *to, DOT_NODE *fromChild ){
+	if ( to->dotNodeFirstChild && fromChild ){
+		DOT_NODE *dupFromChild = dot_node_duplicate_tree (parser, to, fromChild, to->dotNodeDepth );
+		dot_node_add_child (parser, to, dupFromChild, 1 );
+	} else 
+	if ( fromChild ){
+		DOT_NODE *dupFromChild = dot_node_duplicate_tree (parser, to, fromChild, to->dotNodeDepth );
+		dot_node_add_child (parser, to, dupFromChild, 1 );
+	}
+}
+
+static void dot_node_attribute_lob_value_merge ( DOT_PARSER *parser, DOT_NODE *to, char *value ){
+	if ( to->dotNodeValue && value ){
+		int nChars = strlen(value);
+		to->dotNodeValue = (char*) realloc ( to->dotNodeValue, to->dotNodeValueSize + nChars );
+		memcpy ( &(to->dotNodeValue[to->dotNodeValueSize]), value, nChars );
+	} else 
+	if ( value ){
+		to->dotNodeValue = strdup ( value );
+	}
+}
+
+static void dot_node_attribute_value_lob_merge ( DOT_PARSER *parser, DOT_NODE *to, char *value, int len ){
+	if ( to->dotNodeValue && value ){
+		int nChars = strlen(value);
+		to->dotNodeValue = (char*) realloc ( to->dotNodeValue, len + nChars );
+		memcpy ( &(to->dotNodeValue[nChars]), value, len );
+	} else 
+	if ( value ){
+		to->dotNodeValue = (char*) malloc ( len );
+		memcpy ( to->dotNodeValue, value, len );
+	}
+}
+
+static void dot_node_attribute_lob_lob_merge ( DOT_PARSER *parser, DOT_NODE *to, char *value, int len ){
+	if ( to->dotNodeValue && value ){
+		to->dotNodeValue = (char*) realloc ( to->dotNodeValue, to->dotNodeValueSize + len );
+		memcpy ( &(to->dotNodeValue[to->dotNodeValueSize]), value, len );
+	} else 
+	if ( value ){
+		to->dotNodeValue = (char*) malloc ( len );
+		memcpy ( to->dotNodeValue, value, len );
+	}
+}
+char*       dot_parser_dump_node_type( DOT_PARSER *parser, unsigned int type );
+
+static inline void dot_node_attribute_merge_error( DOT_PARSER *parser, DOT_NODE_TYPE toNodeType, DOT_NODE_TYPE fromNodeType ){
+	fprintf( stderr, "WARN: Operation error, Not doing anything, cannot merge from %s to %s \n",
+	        dot_parser_dump_node_type( parser, toNodeType ),
+	        dot_parser_dump_node_type( parser, toNodeType ) );
+}
+
+static void dot_node_attribute_element_merge ( DOT_PARSER *parser, DOT_NODE *to, DOT_NODE *fromChild ){
+	DOT_NODE *tmpNode = 0;
+	tmpNode = dot_node_new(parser);
+	switch( fromChild->dotNodeType ){
+		case DOT_NODE_LISTATTRIBUTE:
+		case DOT_NODE_RESULTATTRIBUTE:
+		case DOT_NODE_RESULTLISTATTRIBUTE:
+		case DOT_NODE_BLOBATTRIBUTE:
+		case DOT_NODE_CLOBATTRIBUTE:
+			dot_node_copy( parser, tmpNode, fromChild, to->dotNodeDepth + 1 );
+			dot_node_add_child (parser, to, tmpNode, 0);
+			break;
+		default:
+			break;
+	}
+}
+
+
+static void dot_node_attribute_merge_attribute_value( DOT_PARSER *parser, DOT_NODE *marked, DOT_NODE *markedFrom,
+                                                 	  char *value1, char *value2, char *value3, char *value4 ){
+	DOT_NODE *toNode   = dot_node_attribute_find ( parser, marked->dotNodeFirstChild, value1, value2);
+	DOT_NODE *fromNode = dot_node_attribute_find ( parser, markedFrom->dotNodeFirstChild, value3, value4);
+	if ( toNode && fromNode ){
+		switch( fromNode->dotNodeType ){
+			case DOT_NODE_ELEMENT:
+				{
+					switch( toNode->dotNodeType ){
+						case DOT_NODE_ELEMENT:
+							dot_node_attribute_tags_tags_merge (parser, toNode, fromNode->tags);
+						case DOT_NODE_ATTRIBUTE:
+						case DOT_NODE_TEXTATTRIBUTE:
+							dot_node_attribute_value_value_merge (parser, toNode, fromNode->dotNodeValue );
+							break;
+						case DOT_NODE_LISTATTRIBUTE:
+							dot_node_attribute_list_list_merge (parser, toNode, fromNode->list);
+							break;
+						case DOT_NODE_RESULTATTRIBUTE:
+						case DOT_NODE_RESULTLISTATTRIBUTE:
+							break;
+						case DOT_NODE_BLOBATTRIBUTE:
+						case DOT_NODE_CLOBATTRIBUTE:
+							dot_node_attribute_lob_value_merge(parser, toNode, fromNode->dotNodeValue );
+							break;
+						default:
+							dot_node_attribute_merge_error( parser, fromNode->dotNodeType, toNode->dotNodeType );
+							break;
+					}
+					toNode->dotNodeType  = fromNode->dotNodeType;
+					toNode->dotNodeState = fromNode->dotNodeState;
+					dot_node_attribute_node_node_merge (parser, toNode, fromNode->dotNodeFirstChild);
+				}
+				break;
+			case DOT_NODE_ATTRIBUTE:
+			case DOT_NODE_TEXTATTRIBUTE:
+				{
+					switch( toNode->dotNodeType ){
+						case DOT_NODE_ELEMENT:
+						case DOT_NODE_ATTRIBUTE:
+						case DOT_NODE_TEXTATTRIBUTE:
+							dot_node_attribute_value_value_merge (parser, toNode, fromNode->dotNodeValue );
+							break;
+						case DOT_NODE_LISTATTRIBUTE:
+							//TODO: nothing to merge, not same type
+							dot_node_attribute_merge_error( parser, fromNode->dotNodeType, toNode->dotNodeType );
+							break;
+						case DOT_NODE_RESULTATTRIBUTE:
+						case DOT_NODE_RESULTLISTATTRIBUTE:
+							//TODO: nothing to merge, not same type
+							break;
+						case DOT_NODE_BLOBATTRIBUTE:
+						case DOT_NODE_CLOBATTRIBUTE:
+							dot_node_attribute_lob_value_merge(parser, toNode, fromNode->dotNodeValue );
+							break;
+						default:
+							dot_node_attribute_merge_error( parser, fromNode->dotNodeType, toNode->dotNodeType );
+							break;
+					}
+				}
+				break;
+			case DOT_NODE_LISTATTRIBUTE:
+				{
+					switch( toNode->dotNodeType ){
+						case DOT_NODE_ELEMENT:
+							dot_node_attribute_element_merge (parser, toNode, fromNode);
+							//TODO: Create new node and add child in toNode
+							break;
+						case DOT_NODE_ATTRIBUTE:
+						case DOT_NODE_TEXTATTRIBUTE:
+							//TODO: nothing to merge, not same type
+							dot_node_attribute_merge_error( parser, fromNode->dotNodeType, toNode->dotNodeType );
+							break;
+						case DOT_NODE_LISTATTRIBUTE:
+							dot_node_attribute_list_list_merge (parser, toNode, fromNode->list);
+							break;
+						case DOT_NODE_RESULTATTRIBUTE:
+						case DOT_NODE_RESULTLISTATTRIBUTE:
+							//TODO: nothing to merge, not same type
+							dot_node_attribute_merge_error( parser, fromNode->dotNodeType, toNode->dotNodeType );
+							break;
+						case DOT_NODE_BLOBATTRIBUTE:
+						case DOT_NODE_CLOBATTRIBUTE:
+							//TODO: nothing to merge, not same type
+							dot_node_attribute_merge_error( parser, fromNode->dotNodeType, toNode->dotNodeType );
+							break;
+						default:
+							dot_node_attribute_merge_error( parser, fromNode->dotNodeType, toNode->dotNodeType );
+							break;
+					}
+				}
+				break;
+			case DOT_NODE_RESULTATTRIBUTE:
+			case DOT_NODE_RESULTLISTATTRIBUTE:
+				{
+					switch( toNode->dotNodeType ){
+						case DOT_NODE_ELEMENT:
+							dot_node_attribute_element_merge (parser, toNode, fromNode);
+							//TODO: Create new node and add child in toNode
+							break;
+						case DOT_NODE_ATTRIBUTE:
+						case DOT_NODE_TEXTATTRIBUTE:
+							//TODO: nothing to merge, not same type
+							dot_node_attribute_merge_error( parser, fromNode->dotNodeType, toNode->dotNodeType );
+							break;
+						case DOT_NODE_LISTATTRIBUTE:
+							//TODO: nothing to merge, not same type
+							dot_node_attribute_merge_error( parser, fromNode->dotNodeType, toNode->dotNodeType );
+							break;
+						case DOT_NODE_RESULTATTRIBUTE:
+						case DOT_NODE_RESULTLISTATTRIBUTE:
+							dot_node_attribute_node_node_merge (parser, toNode, fromNode->dotNodeFirstChild);
+							break;
+						case DOT_NODE_BLOBATTRIBUTE:
+						case DOT_NODE_CLOBATTRIBUTE:
+							//TODO: nothing to merge, not same type
+							dot_node_attribute_merge_error( parser, fromNode->dotNodeType, toNode->dotNodeType );
+							break;
+						default:
+							dot_node_attribute_merge_error( parser, fromNode->dotNodeType, toNode->dotNodeType );
+							break;
+					}
+				}
+				break;
+			case DOT_NODE_BLOBATTRIBUTE:
+			case DOT_NODE_CLOBATTRIBUTE:
+				{
+					switch( toNode->dotNodeType ){
+						case DOT_NODE_ELEMENT:
+							dot_node_attribute_element_merge (parser, toNode, fromNode);
+							//TODO: Create new node and add child in toNode
+							break;
+						case DOT_NODE_ATTRIBUTE:
+						case DOT_NODE_TEXTATTRIBUTE:
+							dot_node_attribute_value_lob_merge (parser, toNode, fromNode->dotNodeValue, fromNode->dotNodeValueSize);
+							break;
+						case DOT_NODE_LISTATTRIBUTE:
+							//TODO: nothing to merge, not same type
+							dot_node_attribute_merge_error( parser, fromNode->dotNodeType, toNode->dotNodeType );
+							break;
+						case DOT_NODE_RESULTATTRIBUTE:
+						case DOT_NODE_RESULTLISTATTRIBUTE:
+							//TODO: nothing to merge, not same type
+							dot_node_attribute_merge_error( parser, fromNode->dotNodeType, toNode->dotNodeType );
+							break;
+						case DOT_NODE_BLOBATTRIBUTE:
+						case DOT_NODE_CLOBATTRIBUTE:
+							dot_node_attribute_lob_lob_merge (parser, toNode, fromNode->dotNodeValue, fromNode->dotNodeValueSize);
+							break;
+						default:
+							dot_node_attribute_merge_error( parser, fromNode->dotNodeType, toNode->dotNodeType );
+							break;
+					}
+				}
+				break;
+			default:
+				dot_node_attribute_merge_error( parser, fromNode->dotNodeType, toNode->dotNodeType );
+				break;
+		}
+	}
+}
 
 static void dot_node_attribute_plus_attribute_value ( DOT_PARSER *parser, DOT_NODE *marked, DOT_NODE *markedFrom, DOT_NODE_LIST *list ){
+	char *value1, *value2, *value3, *value4;
+	int n = dot_node_list_get_values (list, &value1, &value2, &value3, &value4);
+	if( n == 4 ){
+		dot_node_attribute_merge_attribute_value ( parser, marked, markedFrom, value1, value2, value3, value4 );
+	} else 
+	if( n == 3 ){
+		fprintf( stderr, "WARN: dot_node_attribute_plus_attribute_value(): Number of arguments == 3, performing operation append \n");
+		DOT_NODE *toNode   = dot_node_attribute_find ( parser, marked->dotNodeFirstChild, value1, value2);
+		if ( toNode ){
+			if( toNode->dotNodeValue ){
+				char *oldvalue = toNode->dotNodeValue;
+				toNode->dotNodeValue = (char*) realloc( toNode->dotNodeValue, strlen( toNode->dotNodeValue ) +
+				                                       strlen(value3) + 1 );
+				strcat ( toNode->dotNodeValue, value3 );
+			} else {
+				toNode->dotNodeValue = strdup( value3 );
+			}
+		}
+	} else 
+	if( n == 2 ){
+		fprintf( stderr, "WARN: dot_node_attribute_plus_attribute_value(): Number of arguments == 2, performing operation copy from \"fromNode\" \n");
+		DOT_NODE *fromNode   = dot_node_attribute_find ( parser, markedFrom->dotNodeFirstChild, value1, value2);
+		if ( fromNode ){
+			DOT_NODE *toNode     = dot_node_duplicate_node (parser, fromNode, marked->dotNodeDepth );
+			if ( toNode ){
+				DOT_NODE *firstChild = dot_node_duplicate_tree (parser, toNode, fromNode->dotNodeFirstChild, marked->dotNodeDepth+ 1 );
+				dot_node_add_child (parser, marked, toNode, 0);
+			} else {
+				fprintf( stderr, "ERRR: dot_node_attribute_plus_attribute_value(): Unable duplicate parent node attribute Node:%s, Attribute:%s, Index:%s \n",
+			        markedFrom->dotNodeName?markedFrom->dotNodeName:"",
+			        value1, value2);
+			}
+		} else {
+			fprintf( stderr, "ERRR: dot_node_attribute_plus_attribute_value(): Unable to find attribute Node:%s, Attribute:%s, Index:%s \n",
+			        markedFrom->dotNodeName?markedFrom->dotNodeName:"",
+			        value1, value2);
+		}
+	} else {
+		fprintf( stderr, "ERRR: dot_node_attribute_plus_attribute_value(): Number of arguments < 2 in operation + \n");
+	}
+}
+
+static void dot_node_attribute_plus_attribute_value2 ( DOT_PARSER *parser, DOT_NODE *marked, DOT_NODE *markedFrom, DOT_NODE_LIST *list ){
 	char *attrName = list->value;
 	if(!attrName)
 		return;
@@ -1074,6 +1398,8 @@ int dot_parser_parse_line (DOT_PARSER *parser, char *line, unsigned int length )
 		if( parser->name && parser->name[0] ){
 			switch( parser->name[0] ){
 				case '+':
+						//fprintf( stderr, "DBUG: Appending Attribute with Name: %s \n", node->list?node->list->value:"");
+						dot_node_attribute_plus_attribute_value (parser, parser->toNode, parser->fromNode, node->list );
 						break;
 				case '-':
 						fprintf( stderr, "DBUG: Deleting Attribute with Name: %s \n", node->list?node->list->value:"");

@@ -41,7 +41,7 @@ int main () {
 	char *line031b = "..+ 1third:3third 2fourth:4fourth 4fifth:5fifth  \n";
 	char *line031c = ".^ \n";
 	char *line032 = ".html9 @:1234567 #:d4,e5,f6 .:xyz5678 first:2first    xxxsecond:3second  \n";
-	char *line033 = ".html10 @:1234 #:d4,e5,f6 .:xyz5678 first:2first    xxxsecond:3second  \n";
+	char *line033 = ".html10 @:1234 #:d4,e5,f6 .:xyz5678 first:checkthis    xxxsecond:3second  \n";
 	char *line034 = "..body10 @:123xxx4 #:d4,e5,f6 .:xyz5678 first:2first    xxxsecond:3second  \n";
 	char *line035 = "..body10 #:rtd4,re5,wf6 .:xyz5678 first:2first    xxxsecond:3second  @:123xxx4 \n";
 	char *line035a = ".^ \n";
@@ -60,7 +60,7 @@ int main () {
 	char *line048 = "@     \r\n";
 	char *line049 = "@          1234\n";
 	char *line050 = "@             xyz123\n";
-	char *line051 = "#  +:first,0,first,0\n";
+	char *line051 = "#  +:first,0\n";
 	char *line052 = "#  -:first,0\n";
 	char *line053 = "#  -:first,2\n";
 	char *line054 = "#  -:first,0\n";
@@ -205,7 +205,7 @@ int main () {
 	dot_parser_parse_line ( dotParser, buf, strlen(buf) );
 
 	fprintf(stderr,"INFO: main(): ======================================================\n");
-	dot_parser_dump( dotParser->docRoot, 0 );
+	dot_parser_dump( dotParser, dotParser->docRoot, 0 );
 
 	dot_parser_delete( dotParser );
 	//fprintf(stderr,"INFO: main(): ======================================================\n");
