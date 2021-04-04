@@ -1356,8 +1356,8 @@ int dot_parser_parse_line ( DOT_PARSER *parser, char *line, unsigned int length 
                         if ( parser->name[1] == 0 ) {
                             switch ( parser->name[0] ) {
                                 case '@': {
-                                        unsigned int hash = dot_parser_get_id_hash ( parser, parser->name );
                                         thisNode->dotNodeId     = strdup ( parser->value );
+                                        unsigned int hash = dot_parser_get_id_hash ( parser, parser->value );
                                         thisNode->dotNodeIdHash = hash;
                                     }
                                     break;
