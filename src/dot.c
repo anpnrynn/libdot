@@ -1100,17 +1100,17 @@ static int strcpy_till_char ( char *result, char *line, char separator ) {
 
         if ( c == '\\' ) {
             if ( lastc == 0 ) {
-				lastc = c;
-/*
-                char nextc = dot_getch ( line, &i );
+                lastc = c;
+                /*
+                                char nextc = dot_getch ( line, &i );
 
-                if ( nextc == separator || nextc == 0 ) {
-                    dot_ungetch ( &i );
-                } else {
-                    dot_ungetch ( &i );
-                    lastc = c;
-                }
-*/
+                                if ( nextc == separator || nextc == 0 ) {
+                                    dot_ungetch ( &i );
+                                } else {
+                                    dot_ungetch ( &i );
+                                    lastc = c;
+                                }
+                */
             } else {
                 if ( lastc == '\\' ) {
                     //save char
@@ -1156,14 +1156,14 @@ static int strcpy_till_char ( char *result, char *line, char separator ) {
     }
 
     result[j] = 0;
-	fprintf(stderr, "Read : '%s' \n", result );
+    fprintf ( stderr, "Read : '%s' \n", result );
     return i;
 }
 
 static DOT_NODE_LIST * dot_parser_parse_attribute_tags ( DOT_PARSER *parser, char *tags, char separator ) {
     DOT_NODE_LIST *tag = 0, *oldTag = 0, *rootTag = 0;
 
-	fprintf(stderr, "Reading tags : '%s' \n", tags );
+    fprintf ( stderr, "Reading tags : '%s' \n", tags );
 
     if ( !tags || tags[0] == ' ' )
     { return 0; }
@@ -1319,7 +1319,7 @@ int dot_parser_parse_line ( DOT_PARSER *parser, char *line, unsigned int length 
         }
 
         if ( dotLineType == DOT_LINE_ELEMENT ) {
-			fprintf(stderr, "DBUG: DOT ELEMENT detected \n");
+            fprintf ( stderr, "DBUG: DOT ELEMENT detected \n" );
             thisNode->dotNodeType    = DOT_NODE_ELEMENT;
             parser->previousNode     = parser->currentNode;
             parser->currentNode      = thisNode;
@@ -1331,9 +1331,9 @@ int dot_parser_parse_line ( DOT_PARSER *parser, char *line, unsigned int length 
         int curIndex = depth + chars;
         int indexOffset = 0;
 
-		if ( curIndex < length && line[curIndex] == ' ' ){
-            curIndex +=  read_till_end_of_char( &line[curIndex], ' ' );
-		}
+        if ( curIndex < length && line[curIndex] == ' ' ) {
+            curIndex +=  read_till_end_of_char ( &line[curIndex], ' ' );
+        }
 
         while ( curIndex < length && line[curIndex] != 0 ) {
             parser->name[0]  = 0;
@@ -1365,21 +1365,25 @@ int dot_parser_parse_line ( DOT_PARSER *parser, char *line, unsigned int length 
                                 case '#':
                                     fprintf ( stderr, "DBUG: dot_parser_parse_line(): Detected tags in node \n" );
                                     tags = dot_parser_parse_attribute_tags ( parser, & ( parser->value[0] ), ',' );
+
                                     if ( thisNode->tags ) {
                                         dot_node_merge_tags ( parser, thisNode, tags );
                                     } else {
                                         thisNode->tags = tags;
                                     }
+
                                     break;
 
                                 case '*':
                                     fprintf ( stderr, "DBUG: dot_parser_parse_line(): Detected lists in node \n" );
                                     tags = dot_parser_parse_attribute_tags ( parser, & ( parser->value[0] ), ',' );
+
                                     if ( thisNode->list ) {
                                         dot_node_merge_list ( parser, thisNode, tags );
                                     } else {
                                         thisNode->list = tags;
                                     }
+
                                     break;
 
                                 case '+':
@@ -1646,19 +1650,21 @@ int dot_parser_parse_line ( DOT_PARSER *parser, char *line, unsigned int length 
 
 int         dot_parser_parse_file ( DOT_PARSER *parser, char *filename ) {
     if ( parser && filename ) {
-		char *buffer = (char*)malloc(DOT_MAXLINE_BUF);	
-		FILE *dot = fopen(filename, "r" );
-		if( dot ) {
-			while ( fgets(buffer, DOT_MAXLINE_BUF, dot) ){
-				dot_parser_parse_line( parser, buffer, strlen(buffer) );
-			}	
-			fclose(dot);
-		} else {
-			fprintf(stderr, "ERRR: Unable to open file \n");
-		}
+        char *buffer = ( char* ) malloc ( DOT_MAXLINE_BUF );
+        FILE *dot = fopen ( filename, "r" );
 
-		if( buffer )
-			free(buffer);
+        if ( dot ) {
+            while ( fgets ( buffer, DOT_MAXLINE_BUF, dot ) ) {
+                dot_parser_parse_line ( parser, buffer, strlen ( buffer ) );
+            }
+
+            fclose ( dot );
+        } else {
+            fprintf ( stderr, "ERRR: Unable to open file \n" );
+        }
+
+        if ( buffer )
+        { free ( buffer ); }
     }
 
     return 1;
@@ -1799,12 +1805,13 @@ static char*       dot_parser_escape_str ( char *str, int list ) {
                     break;
 
                 case ',':
-					if( list ) {
+                    if ( list ) {
                         data[j++] = '\\';
                         data[j++] = ',';
                     } else {
                         data[j++] = ',';
                     }
+
                     break;
 
                 case ';':
@@ -1819,6 +1826,7 @@ static char*       dot_parser_escape_str ( char *str, int list ) {
 
             i++;
         }
+
         data[j++] = 0;
 
         return data;
@@ -1832,19 +1840,19 @@ int         dot_parser_lists_pretty_print ( DOT_PARSER *parser, DOT_NODE *node )
     if ( !node )
     { return 1; }
 
-    DOT_NODE_LIST *tags = node->tags , *rootTags = 0;
-	char *val = 0;
+    DOT_NODE_LIST *tags = node->tags, *rootTags = 0;
+    char *val = 0;
 
-    if ( tags )
-    { fprintf ( stdout, " #:" ); 
+    if ( tags ) {
+        fprintf ( stdout, " #:" );
         rootTags = tags;
     }
 
     while ( tags ) {
         if ( tags->value ) {
-            val = dot_parser_escape_str( tags->value, 1 );   
+            val = dot_parser_escape_str ( tags->value, 1 );
             fprintf ( stdout, "%s,", val );
-            free(val);
+            free ( val );
         }
 
         tags = tags->nextNode;
@@ -1854,17 +1862,19 @@ int         dot_parser_lists_pretty_print ( DOT_PARSER *parser, DOT_NODE *node )
     { fprintf ( stdout, ";" ); }
 
     DOT_NODE_LIST *list = node->list, *rootList = 0;
-    if ( list )
-    { fprintf ( stdout, " *:" ); 
+
+    if ( list ) {
+        fprintf ( stdout, " *:" );
         rootList = list;
     }
 
     while ( list ) {
         if ( list->value ) {
-            val = dot_parser_escape_str( list->value, 1 );   
+            val = dot_parser_escape_str ( list->value, 1 );
             fprintf ( stdout, "%s,", val );
-            free(val);
+            free ( val );
         }
+
         list = list->nextNode;
     }
 
