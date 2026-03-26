@@ -1,0 +1,66 @@
+libdot C++11 package - semicolon terminated value update
+=======================================================
+
+Background
+----------
+This package keeps the overall line-oriented libdot model, selector operations,
+duplicate attributes, and BLOB/CLOB payload handling, but changes how text and
+attribute values are represented.
+
+Previous behavior in this package
+---------------------------------
+- Spaces inside attribute values were represented with underscore-like encoding.
+- Values were serialized in a compact token form that did not preserve natural
+  spacing directly.
+
+Updated behavior
+----------------
+1. Attribute values and text data now preserve spaces directly.
+2. An attribute value ends at the first unescaped semicolon (`;`).
+3. A literal semicolon inside a value must be written as `\;`.
+4. A literal backslash inside a value must be written as `\\`.
+5. Newlines inside serialized values are escaped as `\n`, carriage returns as
+   `\r`, and tabs as `\t`.
+6. The serializer emits semicolon-terminated attributes.
+7. Existing selector and operation lines keep their comma-separated operation
+   argument model.
+
+Examples
+--------
+Single-line text:
+
+    ...h1 .:Hello World;
+
+Escaped semicolon:
+
+    ...p .:A sentence with a literal semicolon\; inside.;
+
+Readable multiline append form:
+
+    .html
+    ..body .:This is a text data and it is supposed to
+    ...+ .:be multiline\; so, that it can be easily read.;
+
+Notes on multiline behavior
+---------------------------
+The parser remains line-oriented. A value fragment that reaches end-of-line
+without a terminating semicolon is still accepted as the current fragment.
+A following append line (`+`) can add more data to the same attribute. This
+supports readable multiline authoring while keeping parsing simple and
+stream-friendly.
+
+LOB handling
+------------
+BLOB/CLOB payload descriptors are unchanged:
+
+    @ node_id
+    # <:attr_name,blob,application/octet-stream,6
+    ABCDEF
+
+The payload continues to be read as raw bytes after the descriptor line.
+
+Compatibility note
+------------------
+This package intentionally changes the textual value encoding used by the
+previous generated package. Files written with underscore-for-space encoding
+should be migrated to explicit semicolon-terminated values.

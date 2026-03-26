@@ -43,6 +43,65 @@ static bool has_tag(const Node* node, const std::string& tag) {
     return std::find(tags.begin(), tags.end(), tag) != tags.end();
 }
 
+static std::size_t skip_ws(const std::string& s, std::size_t pos) {
+    while (pos < s.size() && std::isspace(static_cast<unsigned char>(s[pos]))) ++pos;
+    return pos;
+}
+
+static std::size_t find_unescaped_colon(const std::string& s, std::size_t start) {
+    bool esc = false;
+    for (std::size_t i = start; i < s.size(); ++i) {
+        const char c = s[i];
+        if (esc) { esc = false; continue; }
+        if (c == '\\') { esc = true; continue; }
+        if (c == ':') return i;
+    }
+    return std::string::npos;
+}
+
+struct ParsedAttribute {
+    std::string name;
+    std::string value;
+    bool terminated;
+};
+
+static bool parse_attribute_fragment(const std::string& body, std::size_t& pos, ParsedAttribute& out) {
+    pos = skip_ws(body, pos);
+    if (pos >= body.size()) return false;
+
+    const std::size_t sep = find_unescaped_colon(body, pos);
+    if (sep == std::string::npos) return false;
+
+    out.name = body.substr(pos, sep - pos);
+    std::string value;
+    bool esc = false;
+    bool terminated = false;
+    std::size_t i = sep + 1;
+    for (; i < body.size(); ++i) {
+        const char c = body[i];
+        if (esc) {
+            value.push_back(c);
+            esc = false;
+            continue;
+        }
+        if (c == '\\') {
+            esc = true;
+            continue;
+        }
+        if (c == ';') {
+            terminated = true;
+            ++i;
+            break;
+        }
+        value.push_back(c);
+    }
+    if (esc) value.push_back('\\');
+    out.value = value;
+    out.terminated = terminated;
+    pos = i;
+    return true;
+}
+
 } // namespace
 
 LobValue::LobValue() : declared_size(0) {}
@@ -125,7 +184,7 @@ std::vector<std::string> Node::tags() const {
         const AttributeValue& attr = attributes_[i];
         if (attr.deleted || attr.name != "#") continue;
         std::vector<std::string> parts = split_escaped_public(attr.value, ',');
-        for (std::size_t j = 0; j < parts.size(); ++j) out.push_back(Document::unescape(parts[j]));
+        for (std::size_t j = 0; j < parts.size(); ++j) out.push_back(Document::unescape_value(parts[j]));
     }
     return out;
 }
@@ -208,7 +267,7 @@ std::vector<std::string> Document::split_tokens(const std::string& text) {
     std::string cur;
     bool esc = false;
     for (std::size_t i = 0; i < text.size(); ++i) {
-        char c = text[i];
+        const char c = text[i];
         if (esc) {
             cur.push_back('`');
             cur.push_back(c);
@@ -219,7 +278,7 @@ std::vector<std::string> Document::split_tokens(const std::string& text) {
             esc = true;
             continue;
         }
-        if (c == ' ') {
+        if (std::isspace(static_cast<unsigned char>(c))) {
             if (!cur.empty()) {
                 out.push_back(cur);
                 cur.clear();
@@ -233,49 +292,41 @@ std::vector<std::string> Document::split_tokens(const std::string& text) {
     return out;
 }
 
-std::string Document::unescape(const std::string& value) {
+std::string Document::unescape_value(const std::string& value) {
     std::string out;
     bool esc = false;
     for (std::size_t i = 0; i < value.size(); ++i) {
-        char c = value[i];
+        const char c = value[i];
         if (esc) {
             switch (c) {
-                case '`': out.push_back('`'); break;
-                case '_': out.push_back('_'); break;
+                case ';': out.push_back(';'); break;
+                case '\\': out.push_back('\\'); break;
                 case 'n': out.push_back('\n'); break;
                 case 'r': out.push_back('\r'); break;
                 case 't': out.push_back('\t'); break;
-                case ':': out.push_back(':'); break;
-                case ',': out.push_back(','); break;
-                case ' ': out.push_back(' '); break;
                 default: out.push_back(c); break;
             }
             esc = false;
-        } else if (c == '`') {
+        } else if (c == '\\') {
             esc = true;
-        } else if (c == '_') {
-            out.push_back(' ');
         } else {
             out.push_back(c);
         }
     }
-    if (esc) out.push_back('`');
+    if (esc) out.push_back('\\');
     return out;
 }
 
-std::string Document::escape(const std::string& value) {
+std::string Document::escape_value(const std::string& value) {
     std::string out;
     for (std::size_t i = 0; i < value.size(); ++i) {
-        char c = value[i];
+        const char c = value[i];
         switch (c) {
-            case '`': out += "``"; break;
-            case '_': out += "`_"; break;
-            case '\n': out += "`n"; break;
-            case '\r': out += "`r"; break;
-            case '\t': out += "`t"; break;
-            case ' ': out += "_"; break;
-            case ':': out += "`:"; break;
-            case ',': out += "`,"; break;
+            case '\\': out += "\\\\"; break;
+            case ';': out += "\\;"; break;
+            case '\n': out += "\\n"; break;
+            case '\r': out += "\\r"; break;
+            case '\t': out += "\\t"; break;
             default: out.push_back(c); break;
         }
     }
@@ -334,8 +385,8 @@ void Document::parse_configuration_line(const std::string& line) {
     std::size_t sep = line.find(':');
     if (sep == std::string::npos) return;
     std::unique_ptr<Node> node(new Node(NodeType::Configuration));
-    node->set_name(unescape(trim(line.substr(0, sep))));
-    node->set_value(unescape(trim(line.substr(sep + 1))));
+    node->set_name(trim(line.substr(0, sep)));
+    node->set_value(unescape_value(trim(line.substr(sep + 1))));
     node->set_depth(0);
     root_->add_child(std::move(node));
     current_node_ = root_->children().back().get();
@@ -350,7 +401,7 @@ void Document::parse_selector_line(const std::string& line) {
         current_node_ = previous_node_;
         return;
     }
-    Node* found = get_node_by_id(unescape(marker));
+    Node* found = get_node_by_id(unescape_value(marker));
     if (!found) throw Error("unknown selector at line " + std::to_string(line_number_));
     from_node_ = to_node_;
     to_node_ = found;
@@ -361,24 +412,24 @@ void Document::parse_selector_line(const std::string& line) {
 
 void Document::op_append(const std::vector<std::string>& args) {
     if (!to_node_ || !from_node_ || args.size() < 4) throw Error("append op requires to/from nodes and 4 args");
-    const AttributeValue* src = from_node_->find_attribute(unescape(args[2]), static_cast<std::size_t>(std::atoi(args[3].c_str())));
-    AttributeValue* dst = to_node_->find_attribute(unescape(args[0]), static_cast<std::size_t>(std::atoi(args[1].c_str())));
+    const AttributeValue* src = from_node_->find_attribute(unescape_value(args[2]), static_cast<std::size_t>(std::atoi(args[3].c_str())));
+    AttributeValue* dst = to_node_->find_attribute(unescape_value(args[0]), static_cast<std::size_t>(std::atoi(args[1].c_str())));
     if (!src || !dst) throw Error("append op attribute not found");
     dst->value += src->value;
 }
 
 void Document::op_assign(const std::vector<std::string>& args) {
     if (!to_node_ || !from_node_ || args.size() < 4) throw Error("assign op requires to/from nodes and 4 args");
-    const AttributeValue* src = from_node_->find_attribute(unescape(args[2]), static_cast<std::size_t>(std::atoi(args[3].c_str())));
-    AttributeValue* dst = to_node_->find_attribute(unescape(args[0]), static_cast<std::size_t>(std::atoi(args[1].c_str())));
+    const AttributeValue* src = from_node_->find_attribute(unescape_value(args[2]), static_cast<std::size_t>(std::atoi(args[3].c_str())));
+    AttributeValue* dst = to_node_->find_attribute(unescape_value(args[0]), static_cast<std::size_t>(std::atoi(args[1].c_str())));
     if (!src || !dst) throw Error("assign op attribute not found");
     *dst = *src;
-    dst->name = unescape(args[0]);
+    dst->name = unescape_value(args[0]);
 }
 
 void Document::op_delete(const std::vector<std::string>& args) {
     if (!to_node_ || args.size() < 2) throw Error("delete op requires to node and 2 args");
-    AttributeValue* dst = to_node_->find_attribute(unescape(args[0]), static_cast<std::size_t>(std::atoi(args[1].c_str())));
+    AttributeValue* dst = to_node_->find_attribute(unescape_value(args[0]), static_cast<std::size_t>(std::atoi(args[1].c_str())));
     if (!dst) throw Error("delete op attribute not found");
     dst->deleted = true;
 }
@@ -387,18 +438,18 @@ void Document::op_link(const std::vector<std::string>& args) {
     if (!to_node_) throw Error("link op requires to node");
     if (args.size() == 1) {
         if (!from_node_) throw Error("link op requires from node");
-        to_node_->add_attribute(AttributeValue(unescape(args[0]), "node:" + from_node_->id(), NodeType::ResultAttribute));
+        to_node_->add_attribute(AttributeValue(unescape_value(args[0]), "node:" + from_node_->id(), NodeType::ResultAttribute));
         return;
     }
     if (!from_node_ || args.size() < 4) throw Error("link op requires to/from nodes and 4 args");
-    const AttributeValue* src = from_node_->find_attribute(unescape(args[2]), static_cast<std::size_t>(std::atoi(args[3].c_str())));
+    const AttributeValue* src = from_node_->find_attribute(unescape_value(args[2]), static_cast<std::size_t>(std::atoi(args[3].c_str())));
     if (!src) throw Error("link op source attribute not found");
-    to_node_->add_attribute(AttributeValue(unescape(args[0]), "attr:" + from_node_->id() + ":" + src->name + ":" + src->value, NodeType::ResultAttribute));
+    to_node_->add_attribute(AttributeValue(unescape_value(args[0]), "attr:" + from_node_->id() + ":" + src->name + ":" + src->value, NodeType::ResultAttribute));
 }
 
 void Document::op_tag_search(const std::vector<std::string>& args, bool invert) {
     if (!to_node_ || args.size() < 2) throw Error("tag search op requires at least 2 args");
-    std::string target_name = unescape(args[0]);
+    std::string target_name = unescape_value(args[0]);
     std::size_t arg_index = 1;
     bool use_existing = false;
     std::size_t occurrence = 0;
@@ -408,7 +459,7 @@ void Document::op_tag_search(const std::vector<std::string>& args, bool invert) 
         arg_index = 2;
     }
     std::vector<std::string> required;
-    for (std::size_t i = arg_index; i < args.size(); ++i) required.push_back(unescape(args[i]));
+    for (std::size_t i = arg_index; i < args.size(); ++i) required.push_back(unescape_value(args[i]));
 
     std::vector<Node*> elems;
     collect_elements(root_.get(), elems);
@@ -423,7 +474,7 @@ void Document::op_tag_search(const std::vector<std::string>& args, bool invert) 
         if (!ok) continue;
         if (!first) joined << ',';
         first = false;
-        joined << escape(elems[i]->id().empty() ? elems[i]->name() : elems[i]->id());
+        joined << elems[i]->id().empty() ? elems[i]->name() : elems[i]->id();
     }
     if (use_existing) {
         AttributeValue* dst = to_node_->find_attribute(target_name, occurrence);
@@ -437,9 +488,9 @@ void Document::op_tag_search(const std::vector<std::string>& args, bool invert) 
 
 void Document::op_split(const std::vector<std::string>& args) {
     if (!to_node_ || args.size() < 2) throw Error("split op requires 2 args");
-    AttributeValue* dst = to_node_->find_attribute(unescape(args[0]), 0);
+    AttributeValue* dst = to_node_->find_attribute(unescape_value(args[0]), 0);
     if (!dst) throw Error("split op target not found");
-    const std::string delim_text = unescape(args[1]);
+    const std::string delim_text = unescape_value(args[1]);
     const char delim = delim_text.empty() ? ',' : delim_text[0];
     std::vector<std::string> parts = split_escaped(dst->value, delim);
     std::ostringstream out;
@@ -454,10 +505,10 @@ void Document::op_split(const std::vector<std::string>& args) {
 void Document::op_blob(const std::vector<std::string>& args) {
     if (!to_node_ || args.size() < 4) throw Error("blob op requires attr, kind, mime, size");
     pending_lob_.node = to_node_;
-    pending_lob_.attr_name = unescape(args[0]);
-    const std::string kind = unescape(args[1]);
+    pending_lob_.attr_name = unescape_value(args[0]);
+    const std::string kind = unescape_value(args[1]);
     pending_lob_.attr_type = (kind == "clob") ? NodeType::ClobAttribute : NodeType::BlobAttribute;
-    pending_lob_.media_type = unescape(args[2]);
+    pending_lob_.media_type = unescape_value(args[2]);
     pending_lob_.size = static_cast<std::size_t>(std::strtoul(args[3].c_str(), NULL, 10));
 }
 
@@ -465,7 +516,7 @@ void Document::parse_operation_line(const std::string& line) {
     std::string body = trim(line.substr(1));
     std::size_t sep = body.find(':');
     if (sep == std::string::npos || sep == 0) throw Error("malformed operation at line " + std::to_string(line_number_));
-    char op = body[0];
+    const char op = body[0];
     std::vector<std::string> args = split_escaped(body.substr(sep + 1), ',');
     switch (op) {
         case '+': op_append(args); break;
@@ -481,7 +532,7 @@ void Document::parse_operation_line(const std::string& line) {
 }
 
 void Document::parse_dot_line(const std::string& line) {
-    std::size_t depth = count_leading_dots(line);
+    const std::size_t depth = count_leading_dots(line);
     std::string body = trim(line.substr(depth));
     if (body.empty()) return;
 
@@ -497,18 +548,21 @@ void Document::parse_dot_line(const std::string& line) {
         body = trim(body.substr(1));
     }
 
-    std::vector<std::string> tokens = split_tokens(body);
-    if (tokens.empty()) return;
-
     Node* target = NULL;
+    std::size_t pos = 0;
+
     if (append_only) {
         if (!previous_node_) throw Error("attribute append without previous node");
         if (depth != previous_node_->depth() + 1) throw Error("attribute append depth mismatch at line " + std::to_string(line_number_));
         target = previous_node_;
     } else {
+        pos = skip_ws(body, pos);
+        std::size_t name_end = pos;
+        while (name_end < body.size() && !std::isspace(static_cast<unsigned char>(body[name_end]))) ++name_end;
+        if (name_end == pos) throw Error("missing element name at line " + std::to_string(line_number_));
         std::unique_ptr<Node> node(new Node(NodeType::Element));
         node->set_depth(depth);
-        node->set_name(unescape(tokens[0]));
+        node->set_name(body.substr(pos, name_end - pos));
         Node* parent = ensure_parent_for_depth(depth);
         parent->add_child(std::move(node));
         target = parent->children().back().get();
@@ -517,21 +571,14 @@ void Document::parse_dot_line(const std::string& line) {
         if (depth_stack_.size() <= depth) depth_stack_.resize(depth + 1, NULL);
         depth_stack_[depth] = target;
         for (std::size_t i = depth + 1; i < depth_stack_.size(); ++i) depth_stack_[i] = NULL;
+        pos = name_end;
     }
 
-    const std::size_t begin = append_only ? 0 : 1;
-    for (std::size_t i = begin; i < tokens.size(); ++i) {
-        const std::string& tok = tokens[i];
-        std::size_t sep = std::string::npos;
-        bool esc = false;
-        for (std::size_t j = 0; j < tok.size(); ++j) {
-            if (esc) { esc = false; continue; }
-            if (tok[j] == '`') { esc = true; continue; }
-            if (tok[j] == ':') { sep = j; break; }
-        }
-        if (sep == std::string::npos) continue;
-        std::string name = unescape(tok.substr(0, sep));
-        std::string value = unescape(tok.substr(sep + 1));
+    while (pos < body.size()) {
+        ParsedAttribute parsed;
+        if (!parse_attribute_fragment(body, pos, parsed)) break;
+        const std::string name = parsed.name;
+        const std::string value = unescape_value(parsed.value);
         NodeType type = NodeType::Attribute;
         if (name == ".") type = NodeType::TextAttribute;
         else if (name == "#") type = NodeType::ListAttribute;
@@ -598,29 +645,30 @@ void Document::serialize_attrs(const Node* node, std::string& out, bool) const {
     for (std::size_t i = 0; i < attrs.size(); ++i) {
         if (attrs[i].deleted || attrs[i].has_lob()) continue;
         out.push_back(' ');
-        out += escape(attrs[i].name);
+        out += attrs[i].name;
         out.push_back(':');
-        out += escape(attrs[i].value);
+        out += escape_value(attrs[i].value);
+        out.push_back(';');
     }
 }
 
 void Document::serialize_node(const Node* node, std::string& out, bool pretty) const {
     if (!node) return;
     if (node->type() == NodeType::Configuration) {
-        out += escape(node->name()) + ":" + escape(node->value()) + "\n";
+        out += node->name() + ":" + escape_value(node->value()) + "\n";
         return;
     }
     if (node->type() != NodeType::Element) return;
     out.append(node->depth(), '.');
-    out += escape(node->name());
+    out += node->name();
     serialize_attrs(node, out, pretty);
     out += "\n";
     const std::vector<AttributeValue>& attrs = node->attributes();
     for (std::size_t i = 0; i < attrs.size(); ++i) {
         const AttributeValue& attr = attrs[i];
         if (attr.deleted || !attr.has_lob()) continue;
-        out += "@ " + escape(node->id()) + "\n";
-        out += "# <:" + escape(attr.name) + "," + (attr.type == NodeType::ClobAttribute ? "clob" : "blob") + "," + escape(attr.lob.media_type) + "," + std::to_string(attr.lob.declared_size) + "\n";
+        out += "@ " + node->id() + "\n";
+        out += "# <:" + attr.name + "," + (attr.type == NodeType::ClobAttribute ? "clob" : "blob") + "," + attr.lob.media_type + "," + std::to_string(attr.lob.declared_size) + "\n";
         out.append(reinterpret_cast<const char*>(attr.lob.data.data()), attr.lob.data.size());
         out += "\n";
     }

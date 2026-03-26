@@ -142,8 +142,8 @@ public:
 
     std::size_t line_number() const;
 
-    static std::string escape(const std::string& value);
-    static std::string unescape(const std::string& value);
+    static std::string escape_value(const std::string& value);
+    static std::string unescape_value(const std::string& value);
 
 private:
     struct PendingLob {
