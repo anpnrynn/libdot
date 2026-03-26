@@ -3,6 +3,11 @@ THE DOT FORMAT - Version 1, Spec Revision 4
 ===========================================
 ===========================================
 
+NOTE:
+Old implementation moved to private repo libdot-old-impl.   
+No more underscores, semicolon ends the text data and attributes.    
+Semicolon should be escaped with '\' to use it. And '\\' is '\'. 
+
 Author:
 =======
 Anoop Kumar Narayanan,
