@@ -7,6 +7,7 @@ NOTE:
 Old implementation moved to private repo libdot-old-impl.   
 No more underscores, semicolon ends the text data and attributes.    
 Semicolon should be escaped with '\' to use it. And '\\' is '\'. 
+Please read libdot_cpp11_prod/DESIGN.txt before reading this.
 
 Author:
 =======
